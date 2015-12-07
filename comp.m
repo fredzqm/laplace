@@ -4,6 +4,7 @@ classdef comp < handle
     properties
         rel ; % relationship to other component
         taylor ; % taylor series fixed now
+        taylor2 ;
     end
     
     properties (Dependent)
@@ -14,6 +15,7 @@ classdef comp < handle
         function newComp = comp( init )
             newComp.rel = [];
             newComp.taylor = init;
+            newComp.taylor2 = init;
         end
         
         function v = get.len(this)
@@ -24,6 +26,9 @@ classdef comp < handle
             this.taylor(this.len + 1 ) = value;
         end
         
+        function [this] = add2( this, value )
+            this.taylor2(this.len + 1 ) = value;
+        end
         % call comp.addR( coefficient , order , list of comps multiplied ] );
         % add a relationship term
         function [this] = addR(this , coefficient , order , comps )
@@ -72,14 +77,7 @@ classdef comp < handle
             end
         end
         
-    end
-    
-    methods (Access = private)
-        
-        
-        
-    end
-        
+    end       
 end
 
 
