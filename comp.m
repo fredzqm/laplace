@@ -41,15 +41,16 @@ classdef comp < handle
             this.add(next / this.len );
         end
         
-        
         function v = computeItem( this ,  k )
-            o = this.len - k.order ;
+            o = this.len - k.order;
             if o < 1
                 v = 0;
                 return;
             end
             numComp = size( k.comps , 2 );
-            if numComp == 1
+            if numComp == 0
+                v = 0 ;
+            elseif numComp == 1
                 v = k.comps(1).taylor(o);
             else
                 a = k.comps(numComp).taylor(1 : o);
@@ -75,27 +76,29 @@ classdef comp < handle
     
     methods (Access = private)
         
-        function v = convEnd( a , b)
-            v = 0;
-            len = size( a , 2 );
-            for i = 1 : len
-                v = v + a(i) * b(len-i+1);
-            end
-        end
-
-        function v = convEqualLen( a , b )
-            len = size(a,2);
-            v = zeros(1 , len);
-            for i = b
-                v = v + i * a;
-                a = [0 a(1:len-1)];
-            end
-        end
+        
         
     end
         
 end
 
+
+function v = convEnd( a , b)
+    v = 0;
+    len = size( a , 2 );
+    for i = 1 : len
+        v = v + a(i) * b(len-i+1);
+    end
+end
+
+function v = convEqualLen( a , b )
+    len = size(a,2);
+    v = zeros(1 , len);
+    for i = b
+        v = v + i * a;
+        a = [0 a(1:len-1)];
+    end
+end
 
 
 

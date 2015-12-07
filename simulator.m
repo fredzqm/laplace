@@ -8,7 +8,7 @@ classdef simulator < handle
     end
     
     methods
-        function addR(this , addTo, coefficient , order , comps )
+        function addR(this , addTo, coefficient , order, comps )
             newAdd.addTo = addTo ;
             newAdd.coefficient = coefficient ;
             newAdd.order = order ;
@@ -22,7 +22,10 @@ classdef simulator < handle
                 for j = k.comps
                     comps = [ comps this.f(this.seg , j)];
                 end
-                this.f(this.seg , k.addTo).addR( k.coefficient, k.order , comps );
+                if k.order ~= 0
+                    this.f(this.seg , k.addTo).addR(k.coefficient*this.t(this.seg)^k.order , 0 ,  comps );
+                end
+                this.f(this.seg , k.addTo).addR( k.coefficient, k.order ,  comps );
             end
         end
         
@@ -39,10 +42,12 @@ classdef simulator < handle
             end
         end
                 
-        function compute(this)
-           for i = this.f(this.seg,:)
-               i.compute();
-           end 
+        function compute(this , times)
+            for k = 1 : times
+                for i = this.f(this.seg,:)
+                    i.compute();
+                end
+            end 
         end
         
         function reset(this , resetTime)
@@ -51,11 +56,14 @@ classdef simulator < handle
             for k = 1 : size( this.f , 2 )
                 newSegComp = [newSegComp  comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ];
             end
-            this.seg = this.seg + 1;
             this.f = [this.f ; newSegComp];
+            this.seg = this.seg + 1;
             this.start();
         end
         
+        function plot(this , tt , compare)
+            plot( tt , this.func(tt) , '-' , tt , compare(tt) , '.' ); 
+        end
     end
     
     methods (Access = private)
