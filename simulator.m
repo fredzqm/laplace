@@ -3,7 +3,8 @@ classdef simulator < handle
     properties (SetAccess = public)
         rel = [];
         f = comp(0);
-        t = [];
+        t = 0 ;
+        seg = 1;
     end
     
     methods
@@ -16,40 +17,42 @@ classdef simulator < handle
         end
         
         function start(this)
-            seg = size( this.f , 1 );
             for k = this.rel
                 comps = [];
                 for j = k.comps
-                    comps = [ comps this.f(seg , j)];
+                    comps = [ comps this.f(this.seg , j)];
                 end
-                this.f(seg , k.addTo).addR( k.coefficient, k.order , comps );
+                this.f(this.seg , k.addTo).addR( k.coefficient, k.order , comps );
             end
         end
         
-        function v = func(this , tt)
-            v = tt ;
-            seg = 1;
-            lower = 0 ;
+        function vv = func(this , tt)
+            vv = tt ;
+            segn = 1;
             upper = this.findThresh(1);
             for i = 1 : size(tt , 2)
                 while tt(i) > upper
-                    seg = seg + 1;
-                    lower = upper;
-                    upper = this.findThresh(seg);
+                    segn = segn + 1;
+                    upper = this.findThresh(segn);
                 end
-                v(i) = this.f(seg , 1).func( tt(i) - lower );
+                vv(i) = this.f(segn , 1).func( tt(i) - this.t(segn));
             end
         end
                 
         function compute(this)
-           for i = this.f
+           for i = this.f(this.seg,:)
                i.compute();
            end 
         end
         
         function reset(this , resetTime)
-            
-            
+            this.t = [this.t resetTime];
+            newSegComp = [];
+            for k = 1 : size( this.f , 2 )
+                newSegComp = [newSegComp  comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ];
+            end
+            this.seg = this.seg + 1;
+            this.f = [this.f ; newSegComp];
             this.start();
         end
         
@@ -57,10 +60,10 @@ classdef simulator < handle
     
     methods (Access = private)
        function thresh = findThresh(this, seg)
-            if size(this.t , 2) < seg
+            if size(this.t , 2) < seg + 1
                 thresh = inf;
             else
-                thresh = this.t(seg);
+                thresh = this.t(seg + 1);
             end
         end 
     end
