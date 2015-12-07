@@ -28,20 +28,7 @@ classdef simulator < handle
                 this.f(this.seg , k.addTo).addR( k.coefficient, k.order ,  comps );
             end
         end
-        
-        function vv = func(this , tt)
-            vv = tt ;
-            segn = 1;
-            upper = this.findThresh(1);
-            for i = 1 : size(tt , 2)
-                while tt(i) > upper
-                    segn = segn + 1;
-                    upper = this.findThresh(segn);
-                end
-                vv(i) = this.f(segn , 1).func( tt(i) - this.t(segn));
-            end
-        end
-                
+                       
         function compute(this , times)
             for k = 1 : times
                 for i = this.f(this.seg,:)
@@ -62,7 +49,38 @@ classdef simulator < handle
         end
         
         function plot(this , tt , compare)
-            plot( tt , this.func(tt) , '-' , tt , compare(tt) , '.' ); 
+            tts = min(tt): (max(tt)-min(tt))/30 : max(tt);
+            size(tts)
+            plot( tt , this.func(tt) , '-' ...
+               , tts , compare(tts) , '.' ...
+               , tt , this.deriv(tt , 1) , 'y' ...
+               ); 
+        end
+        
+        function vv = func(this , tt)
+            vv = tt ;
+            segn = 1;
+            upper = this.findThresh(1);
+            for i = 1 : size(tt , 2)
+                while tt(i) > upper
+                    segn = segn + 1;
+                    upper = this.findThresh(segn);
+                end
+                vv(i) = this.f(segn , 1).func( tt(i) - this.t(segn));
+            end
+        end
+        
+        function vv = deriv(this , tt , k)
+            vv = tt ;
+            segn = 1;
+            upper = this.findThresh(1);
+            for i = 1 : size(tt , 2)
+                while tt(i) > upper
+                    segn = segn + 1;
+                    upper = this.findThresh(segn);
+                end
+                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
+            end
         end
     end
     

@@ -10,14 +10,15 @@ s.addR( 2 , -1, 0 , 1 );
 s.start();
 
 %% compute
-for x = 1 : 100
-    s.compute(20)
-    if x ~= 3
-        s.reset(x);
+u = 200 ;
+for x = 1 : u
+    s.compute(40)
+    if x ~= u
+        s.reset(x/20);     
     end
 end
 
 %% display
 answer = @(x) sin(x);
-t = 0 :0.1: 20 ;
+t = 0 :0.01: 20 ;
 s.plot( t , answer );

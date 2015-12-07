@@ -10,14 +10,15 @@ s.addR( 2 , -2 , 1 , 1 );
 s.start();
 
 %% compute
-for x = 1 : 4
-    s.compute(1000)
-    if x ~= 4
+u = 20;
+for x = 1 : u
+    s.compute(30)
+    if x ~= u
         s.reset(x/2);
     end
 end
 
 %% display
 answer = @(t) sin(t.^2);
-t = 0 :0.01: 4 ;
+t = 0 :0.01: 10 ;
 s.plot( t , answer );

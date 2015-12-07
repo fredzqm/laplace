@@ -13,16 +13,15 @@ s.addR( 3 , -1, 0 , [3 3]);
 s.start();
 
 %% compute
-for x = 1 : 1200
-    s.compute(100)
-    if x ~= 1200
+u = 120;
+for x = 1 : u
+    s.compute(10)
+    if x ~= u
         s.reset(x/10);
     end
 end
 
 %% display
 answer = @(x) sqrt(x+1).*cos(x.^2);
-start = 119.9;
-range = 0.15;
-t = start :0.001: start + range ;
+t = 5 :0.01: 6 ;
 s.plot( t , answer );

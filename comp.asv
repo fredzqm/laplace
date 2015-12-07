@@ -15,7 +15,6 @@ classdef comp < handle
         function newComp = comp( init )
             newComp.rel = [];
             newComp.taylor = init;
-            newComp.taylor2 = init;
         end
         
         function v = get.len(this)
@@ -23,8 +22,8 @@ classdef comp < handle
         end
         
         function [this] = add( this, value )
-            this.taylor2(this.len + 1 ) = value * factorial(this.len);
             this.taylor(this.len + 1 ) = value;
+            this.taylor2(this.len + 1 ) = value*factorial(this.len);
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
@@ -76,7 +75,7 @@ classdef comp < handle
         end
         
         function v = deriv(this, t , k )
-            v = this.taylor2(this.len) ;
+            v = this.taylor(this.len) ;
             for  i = this.len - 1 : -1 : k + 1
                 v = v * t / (i - k) + this.taylor2( i ) ;
             end
