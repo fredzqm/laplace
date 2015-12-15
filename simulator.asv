@@ -39,19 +39,13 @@ classdef simulator < handle
         
         function reset(this , resetTime)
             this.t = [this.t resetTime];
-            newSegComp = [];
+            newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
-                newSegComp = [newSegComp  comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ];
+                newSegComp(k) = comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ;
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
             this.start();
-        end
-        
-        function plot(this , tt , compare)
-            plot( tt , this.func(tt) , '-' , ...
-                tt , compare(tt) , '.' , ...
-                tt , this.deriv(tt) , 'y'); 
         end
         
         function vv = func(this , tt)
@@ -67,7 +61,7 @@ classdef simulator < handle
             end
         end
         
-        function vv = deriv(this , tt)
+        function vv = deriv(this , tt , k)
             vv = tt ;
             segn = 1;
             upper = this.findThresh(1);
@@ -76,9 +70,29 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn));
+                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
             end
         end
+        
+        function vv = converge(this, t, kk)
+            vv = kk;
+            for k = kk
+                kt = k / t;
+                v = (-1)^k / factorial(k) * kt^(k+1)
+                vv(k) = v * this.deriv(kt , k);
+            end
+        end
+        
+        function plot(this , tt , compare)
+            tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
+            size(tts)
+            plot( tt , this.func(tt) , '-' ...
+               , tts , compare(tts) , '.' ...
+            , tt , this.deriv(tt , 1) , 'y' ...
+            , tt , this.deriv(tt , 2) , 'g' );
+            
+        end
+        
     end
     
     methods (Access = private)

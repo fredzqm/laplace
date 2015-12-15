@@ -12,7 +12,7 @@ s.start();
 %% compute
 u = 20;
 for x = 1 : u
-    s.compute(30)
+    s.compute(10)
     if x ~= u
         s.reset(x/2);
     end

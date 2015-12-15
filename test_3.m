@@ -13,15 +13,16 @@ s.addR( 3 , -1, 0 , [3 3]);
 s.start();
 
 %% compute
-u = 120;
+u = 1500;
 for x = 1 : u
     s.compute(10)
     if x ~= u
-        s.reset(x/10);
+        s.reset(x/20);
     end
 end
 
-%% display
+%% plot taylor
 answer = @(x) sqrt(x+1).*cos(x.^2);
-t = 5 :0.01: 6 ;
+t = 0 :0.01: 2 ;
 s.plot( t , answer );
+

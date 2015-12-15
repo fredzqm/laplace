@@ -12,7 +12,7 @@ s.start();
 %% compute
 u = 200 ;
 for x = 1 : u
-    s.compute(40)
+    s.compute(100)
     if x ~= u
         s.reset(x/20);     
     end
@@ -22,3 +22,4 @@ end
 answer = @(x) sin(x);
 t = 0 :0.01: 20 ;
 s.plot( t , answer );
+

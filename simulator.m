@@ -39,22 +39,13 @@ classdef simulator < handle
         
         function reset(this , resetTime)
             this.t = [this.t resetTime];
-            newSegComp = [];
+            newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
-                newSegComp = [newSegComp  comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ];
+                newSegComp(k) = comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ;
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
             this.start();
-        end
-        
-        function plot(this , tt , compare)
-            tts = min(tt): (max(tt)-min(tt))/30 : max(tt);
-            size(tts)
-            plot( tt , this.func(tt) , '-' ...
-               , tts , compare(tts) , '.' ...
-               , tt , this.deriv(tt , 1) , 'y' ...
-               ); 
         end
         
         function vv = func(this , tt)
@@ -82,6 +73,34 @@ classdef simulator < handle
                 vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
             end
         end
+        
+        function vv = converge(this, t, kk , answer)
+            vv = kk;
+            aa = kk;
+            aa(:) = answer(t);
+            for i = 1 : size(kk,2)
+                k = kk(i);
+                kt = k / t;
+                v = (-1)^k / factorial(k) * kt^(k+1);
+                x = this.deriv(kt , k);
+                vv(i) = v * x;
+            end
+            plot(kk , vv ,'-', kk , aa , '.');
+        end
+        
+        function plot(this , tt , compare)
+            tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
+            size(tts)
+            plot( tt , this.func(tt) , '-'  , tts , compare(tts) , '.');             
+        end
+        
+        function plotDeriv(this , tt , order)
+            hold on
+            plot( tt , this.deriv(tt , order) , 'y');             
+        end
+        ...
+%             , tt , this.deriv(tt , 1) , 'y' ...
+%             , tt , this.deriv(tt , 2) , 'g' );
     end
     
     methods (Access = private)
