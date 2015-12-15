@@ -5,32 +5,26 @@ classdef simulator < handle
         f = comp(1);
         t;
         seg;
+        minResetTime = 0.05;
+        minOrder = 20;
     end
     
     methods        
-        function newSimulator = simulator(initValue , initTime , relationship)
-            newSimulator.t = initTime;
-            newSimulator.relationship = relationship;
+        function created = simulator(initValue , initTime , relationship)
+            created.t = initTime;
+            created.relationship = relationship;
             for i = 1 : size(initValue, 2)
-                newSimulator.f(i) = comp( initValue(i) );
+                created.f(i) = comp( initValue(i) );
             end
-            newSimulator.seg = 1;
-            newSimulator.start();
+            created.seg = 1;
+            created.addRelations();
         end
         
-        function addR(this , addTo, coefficient , order, comps )
-            newAdd.addTo = addTo ;
-            newAdd.coefficient = coefficient ;
-            newAdd.order = order ;
-            newAdd.comps = comps ;
-            this.relationship = [this.relationship newAdd]; 
-        end
-        
-        function start(this)
+        function addRelations(this)
             for k = this.relationship
                 comps = [];
                 for j = k.comps
-                    comps = [ comps this.f(this.seg , j)];
+                    comps = [comps this.f(this.seg , j)];
                 end
                 if k.order ~= 0
                     this.f(this.seg , k.addTo).addR(k.coefficient*this.t(this.seg)^k.order , 0 ,  comps );
@@ -38,16 +32,26 @@ classdef simulator < handle
                 this.f(this.seg , k.addTo).addR( k.coefficient, k.order ,  comps );
             end
         end
-                       
-        function compute(this , times)
-            for k = 1 : times
+        
+        function compute(this , time)
+            u = time / this.minResetTime ;
+            for x = 1 : u
+                for k = 1 : this.minOrder
+                    for i = this.f(this.seg,:)
+                        i.compute();
+                    end
+                end
+                this.reset(this.minResetTime);
+            end
+            for k = 1 : this.minOrder*3
                 for i = this.f(this.seg,:)
                     i.compute();
                 end
-            end 
+            end
         end
         
-        function reset(this , resetTime)
+        function reset(this , segDuration)
+            resetTime = segDuration + this.t(this.seg);
             this.t = [this.t resetTime];
             newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
@@ -55,7 +59,7 @@ classdef simulator < handle
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
-            this.start();
+            this.addRelations();          
         end
         
         function vv = func(this , tt)
@@ -67,7 +71,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).func( tt(i) - this.t(segn));
+                vv(i) = this.f(segn , 1).func(tt(i) - this.t(segn));
             end
         end
         

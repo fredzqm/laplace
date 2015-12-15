@@ -6,17 +6,13 @@ s = simulator( [0 1] , 0 , ...
     rel( 2 , -2 , 1 , 1 ) ] );
 
 %% compute
-u = 20;
-for x = 1 : u
-    s.compute(100)
-    if x ~= u
-        s.reset(x/2);
-    end
-end
+s.minOrder = 100;
+s.minResetTime = 1/2;
+s.compute(9);
 
 %% display
 figure(1)
 hold off
 answer = @(t) sin(t.^2);
-t = 9 :0.001: 10 ;
+t = 0 :0.01: 10 ;
 s.plot( t , answer );

@@ -4,15 +4,10 @@ clear;
 s = simulator( 1 , 0 , ...
    [ rel(1,-2, 1, [1 1]) ] );
 
-
 %% compute
-u = 1500;
-for x = 1 : u
-    s.compute(150)
-    if x ~= u
-        s.reset(x/20);
-    end
-end
+s.minOrder = 150;
+s.minResetTime = 1/20;
+s.compute(75);
 
 %% plot taylor
 figure(1)

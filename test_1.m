@@ -1,24 +1,19 @@
 % x(t) = sin(t)
 %% initialize
 clear;
-
 s = simulator( [0 1] , 0 , ...
    [rel( 1 , 1 , 0 , 2 ) ...
     rel( 2 , -1, 0 , 1 ) ] );
 
 %% compute
-u = 200 ;
-for x = 1 : u
-    s.compute(100)
-    if x ~= u
-        s.reset(x/20);     
-    end
-end
+s.minOrder = 100;
+s.minResetTime = 1/20;
+s.compute(20);
 
 %% display
 figure(1)
 hold off
 answer = @(x) sin(x);
-t = 0 :0.01: 20 ;
+t = 1 :0.01: 30 ;
 s.plot( t , answer );
 

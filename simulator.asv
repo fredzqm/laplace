@@ -1,41 +1,28 @@
 classdef simulator < handle
     
     properties (SetAccess = public)
-        rel = [];
-        f = comp(0);
-        t = 0 ;
-        seg = 1;
+        relationship;
+        f = comp(1);
+        t;
+        seg;
     end
     
-    methods
-        function newSimulator = simulator(initValue , initTime)
-            s.f(1) = comp(1);
-            s.f(2) = comp(0);
-            s.f(3) = comp(1);
+    methods        
+        function created = simulator(initValue , initTime , relationship)
+            created.t = initTime;
+            created.relationship = relationship;
             for i = 1 : size(initValue, 2)
-                newSimulator.f(i) = initValue(i);
+                created.f(i) = comp( initValue(i) );
             end
-        end
-        
-        function addR(this , addTo, coefficient , order, comps )
-            newAdd.addTo = addTo ;
-            newAdd.coefficient = coefficient ;
-            newAdd.order = order ;
-            newAdd.comps = comps ;
-            this.rel = [this.rel newAdd]; 
-        end
-        
-        function start(this)
-            for k = this.rel
-                comps = [];
-                for j = k.comps
-                    comps = [ comps this.f(this.seg , j)];
-                end
+            created.seg = 1;
+            
+            for k = created.relationship
                 if k.order ~= 0
-                    this.f(this.seg , k.addTo).addR(k.coefficient*this.t(this.seg)^k.order , 0 ,  comps );
+                    created.f(k.addTo).addR( k.coefficient * created.t^k.order , 0 ,  created.f );
                 end
-                this.f(this.seg , k.addTo).addR( k.coefficient, k.order ,  comps );
+                created.f(k.addTo).addR( k.coefficient, k.order ,  created.f );
             end
+            
         end
                        
         function compute(this , times)
@@ -55,6 +42,8 @@ classdef simulator < handle
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
             this.start();
+            
+            
         end
         
         function vv = func(this , tt)
@@ -99,7 +88,6 @@ classdef simulator < handle
         
         function plot(this , tt , compare)
             tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
-            size(tts)
             plot( tt , this.func(tt) , '-'  , tts , compare(tts) , '.');             
         end
         

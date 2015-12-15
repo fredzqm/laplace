@@ -6,18 +6,14 @@ s = simulator( [1 0 1] , 0 , ...
     rel(3, -1, 0, [3 3]) ] );
 
 %% compute
-u = 1500;
-for x = 1 : u
-    s.compute(10)
-    if x ~= u
-        s.reset(x/20);
-    end
-end
+s.minOrder = 20;
+s.minResetTime = 0.1;
+s.compute(150);
 
 %% plot taylor
 figure(1)
 hold off
 answer = @(x) sqrt(x+1).*cos(x.^2);
-t = 0 :0.01: 2 ;
+t = 0 :0.01: 5 ;
 s.plot( t , answer );
 
