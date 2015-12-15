@@ -5,7 +5,7 @@ s = simulator( [1] , 1 , ...
    [rel(1, -1, 0, [1 1]) ] );
 
 %% compute
-s.minOrder = 100;
+s.minOrder = 10;
 s.minResetTime = 1/20;
 s.compute(100);
 
@@ -20,6 +20,6 @@ s.plot( t , answer );
 figure(2)
 hold off
 t = 5;
-kk = 1 : 5;
+kk = 1 : 200;
 answer = @(x) 1;
 vv = s.converge(t,kk , answer);

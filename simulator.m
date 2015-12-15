@@ -52,17 +52,8 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-%                 vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
-%                 continue;
-                leftDuration =  tt(i) - this.t(segn);
-                newSegComp = this.f(1,:);
-                for q = 1 : size( this.f , 2 )
-                    newSegComp(q) = comp( this.f(segn,q).func( leftDuration ) ) ;
-                end
-                addRelations(this.relation , newSegComp , tt(i) );
-                repeatCompute(newSegComp, k);
-       
-                vv(i) = newSegComp(1).taylor(k+1)*factorial(k);
+                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
+                continue;
             end
         end
         
@@ -83,17 +74,33 @@ classdef simulator < handle
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
-                v = (-1)^k / factorial(k) * (kt)^(k+1);
+%                 v = (-1)^k  * (kt)^(k+1) /  factorial(k);
 %                 v = (-1)^k / factorial(k) * (k/exp(1))^(k+1);
-%                 v = (-1)^k / sqrt(2*pi*k) * (k/exp(1));
-%                 v = v * (exp(1)/t)^(k+1) ;
+                v = (-1)^k / sqrt(2*pi*k) * (k/exp(1));
+                v = v * (exp(1)/t)^(k+1) ;
 %                 v = (-1)^k * (kt)^(k+1);
-                x = this.deriv(kt , k);
+                x = this.derivAcc(kt , k);
                 vv(i) = v * x;
             end
             plot(kk , vv ,'-', kk , aa , '.');
         end
         
+        function v = derivAcc(this , t , k)
+            segn = 1;
+            upper = this.findThresh(1);
+            while t > upper
+                segn = segn + 1;
+                upper = this.findThresh(segn);
+            end
+            leftDuration =  t - this.t(segn);
+            newSegComp = this.f(1,:);
+            for q = 1 : size( this.f , 2 )
+                newSegComp(q) = comp( this.f(segn,q).func( leftDuration ) ) ;
+            end
+            addRelations(this.relation , newSegComp , t );
+            repeatCompute(newSegComp, k);
+            v = newSegComp(1).taylor2(k+1)
+        end
     end
     
     

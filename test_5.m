@@ -16,12 +16,12 @@ answer = @(x) 1 ./(x.*x + 1);
 t = 0 :0.01: 10 ;
 s.plot( t , answer );
 s.plotDeriv( t , 1);
-s.plotDeriv( t , 2);
+% s.plotDeriv( t , 2);
 
 %%
 figure(2)
 hold off
-t = 12.9;
-kk = 1 : 300;
+t = 25;
+kk = 1 : 180;
 answer = @(x) sin(x);
 vv = s.converge(t,kk , answer);
