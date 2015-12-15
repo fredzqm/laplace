@@ -8,6 +8,15 @@ classdef simulator < handle
     end
     
     methods
+        function newSimulator = simulator(initValue , initTime)
+            s.f(1) = comp(1);
+            s.f(2) = comp(0);
+            s.f(3) = comp(1);
+            for i = 1 : size(initValue, 2)
+                newSimulator.f(i) = initValue(i);
+            end
+        end
+        
         function addR(this , addTo, coefficient , order, comps )
             newAdd.addTo = addTo ;
             newAdd.coefficient = coefficient ;
@@ -74,25 +83,30 @@ classdef simulator < handle
             end
         end
         
-        function vv = converge(this, t, kk)
+        function vv = converge(this, t, kk , answer)
             vv = kk;
-            for k = kk
+            aa = kk;
+            aa(:) = answer(t);
+            for i = 1 : size(kk,2)
+                k = kk(i);
                 kt = k / t;
-                v = (-1)^k / factorial(k) * kt^(k+1)
-                vv(k) = v * this.deriv(kt , k);
+                v = (-1)^k / factorial(k) * kt^(k+1);
+                x = this.deriv(kt , k);
+                vv(i) = v * x;
             end
+            plot(kk , vv ,'-', kk , aa , '.');
         end
         
         function plot(this , tt , compare)
             tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
             size(tts)
-            plot( tt , this.func(tt) , '-' ...
-               , tts , compare(tts) , '.' ...
-            , tt , this.deriv(tt , 1) , 'y' ...
-            , tt , this.deriv(tt , 2) , 'g' );
-            
+            plot( tt , this.func(tt) , '-'  , tts , compare(tts) , '.');             
         end
         
+        function plotDeriv(this , tt , order)
+            hold on
+            plot( tt , this.deriv(tt , order) , 'y');             
+        end
     end
     
     methods (Access = private)

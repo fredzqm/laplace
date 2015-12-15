@@ -1,23 +1,33 @@
 classdef simulator < handle
     
     properties (SetAccess = public)
-        rel = [];
-        f = comp(0);
-        t = 0 ;
-        seg = 1;
+        relationship;
+        f = comp(1);
+        t;
+        seg;
     end
     
-    methods
+    methods        
+        function newSimulator = simulator(initValue , initTime , relationship)
+            newSimulator.t = initTime;
+            newSimulator.relationship = relationship;
+            for i = 1 : size(initValue, 2)
+                newSimulator.f(i) = comp( initValue(i) );
+            end
+            newSimulator.seg = 1;
+            newSimulator.start();
+        end
+        
         function addR(this , addTo, coefficient , order, comps )
             newAdd.addTo = addTo ;
             newAdd.coefficient = coefficient ;
             newAdd.order = order ;
             newAdd.comps = comps ;
-            this.rel = [this.rel newAdd]; 
+            this.relationship = [this.relationship newAdd]; 
         end
         
         function start(this)
-            for k = this.rel
+            for k = this.relationship
                 comps = [];
                 for j = k.comps
                     comps = [ comps this.f(this.seg , j)];
@@ -90,7 +100,6 @@ classdef simulator < handle
         
         function plot(this , tt , compare)
             tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
-            size(tts)
             plot( tt , this.func(tt) , '-'  , tts , compare(tts) , '.');             
         end
         
@@ -98,9 +107,6 @@ classdef simulator < handle
             hold on
             plot( tt , this.deriv(tt , order) , 'y');             
         end
-        ...
-%             , tt , this.deriv(tt , 1) , 'y' ...
-%             , tt , this.deriv(tt , 2) , 'g' );
     end
     
     methods (Access = private)

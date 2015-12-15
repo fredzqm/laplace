@@ -1,11 +1,8 @@
 % 1/(s+1) -> exp(-t)
 %% initialize
 clear;
-s = simulator();
-s.f(1) = comp(1);
-% s.addR( addTo, coefficient , order , comps )
-s.addR( 1 , -1 , 0 , [1 1] );
-s.start();
+s = simulator( [1] , 0 , ...
+   [rel(1, -1, 0, [1 1]) ] );
 
 %% compute
 u = 1500;

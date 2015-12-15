@@ -1,16 +1,9 @@
 %% initialize
 clear;
-s = simulator();
-s.f(1) = comp(1);
-s.f(2) = comp(0);
-s.f(3) = comp(1);
-% s.addR( addTo, coefficient , order , comps )
-s.addR( 1 , 1/2 , 0 , [1 3] );
-s.addR( 1 , -2  , 1 , 2 );
-s.addR( 2 , 1/2 , 0 , [2 3] );
-s.addR( 2 , 2 , 1 , 1 );
-s.addR( 3 , -1, 0 , [3 3]);
-s.start();
+s = simulator( [1 0 1] , 0 , ...
+   [rel(1,1/2, 0, [1 3]) rel(1,-2, 1, 2) ...
+    rel(2,1/2, 0, [2 3]) rel(2, 2, 1, 1) ...
+    rel(3, -1, 0, [3 3]) ] );
 
 %% compute
 u = 1500;
@@ -22,6 +15,8 @@ for x = 1 : u
 end
 
 %% plot taylor
+figure(1)
+hold off
 answer = @(x) sqrt(x+1).*cos(x.^2);
 t = 0 :0.01: 2 ;
 s.plot( t , answer );

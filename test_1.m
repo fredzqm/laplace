@@ -1,13 +1,10 @@
 % x(t) = sin(t)
 %% initialize
 clear;
-s = simulator();
-s.f(1) = comp(0);
-s.f(2) = comp(1);
 
-s.addR( 1 , 1 , 0 , 2 );
-s.addR( 2 , -1, 0 , 1 );
-s.start();
+s = simulator( [0 1] , 0 , ...
+   [rel( 1 , 1 , 0 , 2 ) ...
+    rel( 2 , -1, 0 , 1 ) ] );
 
 %% compute
 u = 200 ;
@@ -19,6 +16,8 @@ for x = 1 : u
 end
 
 %% display
+figure(1)
+hold off
 answer = @(x) sin(x);
 t = 0 :0.01: 20 ;
 s.plot( t , answer );
