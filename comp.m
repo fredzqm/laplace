@@ -101,4 +101,3 @@ function v = convEqualLen( a , b )
         a = [0 a(1:len-1)];
     end
 end
-
