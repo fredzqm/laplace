@@ -14,5 +14,5 @@ s.compute(9);
 figure(1)
 hold off
 answer = @(t) sin(t.^2);
-t = 0 :0.01: 10 ;
+t = 0 :0.01: 2 ;
 s.plot( t , answer );

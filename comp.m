@@ -63,7 +63,7 @@ classdef comp < handle
                     a = convEqualLen(a , b);
                 end
                 b = k.comps(1).taylor(1 : o);
-                v = convEnd( a , b);
+                v = convEnd(a , b);
             end
             v = v * k.coefficient ;
         end

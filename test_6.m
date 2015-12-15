@@ -13,13 +13,13 @@ s.compute(100);
 figure(1)
 hold off
 answer = @(x) 1./(x);
-t = 0.9 :0.001: 1.1 ;
+t = 0 :0.01: 2;
 s.plot( t , answer );
 
 %%
 figure(2)
 hold off
 t = 5;
-kk = 1 : 80;
+kk = 1 : 5;
 answer = @(x) 1;
 vv = s.converge(t,kk , answer);

@@ -1,10 +1,12 @@
 classdef simulator < handle
     
     properties (SetAccess = public)
-        relationship;
-        f = comp(1);
-        t;
-        seg;
+        relationship; % calculate relationship between comps
+        f = comp(1); % comps used to calcuate taylor series
+        t ; % start time of each segment
+        seg; % the last segment
+        minResetTime = 0.05; % default minResetTime
+        minOrder = 20; % default minOrder
     end
     
     methods        
@@ -15,35 +17,17 @@ classdef simulator < handle
                 created.f(i) = comp( initValue(i) );
             end
             created.seg = 1;
-            
-            for k = created.relationship
-                if k.order ~= 0
-                    created.f(k.addTo).addR( k.coefficient * created.t^k.order , 0 ,  created.f );
-                end
-                created.f(k.addTo).addR( k.coefficient, k.order ,  created.f );
-            end
-            
-        end
-                       
-        function compute(this , times)
-            for k = 1 : times
-                for i = this.f(this.seg,:)
-                    i.compute();
-                end
-            end 
+            created.addRelations(created.f, 1);
+            created.repeatCompute(10);
         end
         
-        function reset(this , resetTime)
-            this.t = [this.t resetTime];
-            newSegComp = this.f(1,:);
-            for k = 1 : size( this.f , 2 )
-                newSegComp(k) = comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ;
+        function compute(this , time)
+            u = time / this.minResetTime ;
+            this.repeatCompute(this.minOrder);
+            for x = 1 : u
+                this.reset(this.minResetTime);
+                this.repeatCompute(this.minOrder);
             end
-            this.f = [this.f ; newSegComp];
-            this.seg = this.seg + 1;
-            this.start();
-            
-            
         end
         
         function vv = func(this , tt)
@@ -55,7 +39,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).func( tt(i) - this.t(segn));
+                vv(i) = this.f(segn , 1).func(tt(i) - this.t(segn));
             end
         end
         
@@ -68,22 +52,11 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
+                this.f(segn , 1)
+                series = calcSeries( segn , tt(i) - this.t(segn) );
+                vv(i) = series.taylor(k+1)*factorial(k);
+%                 vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
             end
-        end
-        
-        function vv = converge(this, t, kk , answer)
-            vv = kk;
-            aa = kk;
-            aa(:) = answer(t);
-            for i = 1 : size(kk,2)
-                k = kk(i);
-                kt = k / t;
-                v = (-1)^k / factorial(k) * kt^(k+1);
-                x = this.deriv(kt , k);
-                vv(i) = v * x;
-            end
-            plot(kk , vv ,'-', kk , aa , '.');
         end
         
         function plot(this , tt , compare)
@@ -95,7 +68,28 @@ classdef simulator < handle
             hold on
             plot( tt , this.deriv(tt , order) , 'y');             
         end
+        
+        function vv = converge(this, t, kk , answer)
+            vv = kk;
+            aa = kk;
+            aa(:) = answer(t);
+            for i = 1 : size(kk,2)
+                k = kk(i);
+                kt = k / t;
+                v = (-1)^k / factorial(k) * (kt)^(k+1);
+%                 v = (-1)^k / factorial(k) * (k/exp(1))^(k+1);
+%                 v = (-1)^k / sqrt(2*pi*k) * (k/exp(1));
+%                 v = v * (exp(1)/t)^(k+1) ;
+%                 v = (-1)^k * (kt)^(k+1);
+                x = this.deriv(kt , k);
+                vv(i) = v * x;
+            end
+            plot(kk , vv ,'-', kk , aa , '.');
+        end
+        
     end
+    
+    
     
     methods (Access = private)
        function thresh = findThresh(this, seg)
@@ -104,6 +98,48 @@ classdef simulator < handle
             else
                 thresh = this.t(seg + 1);
             end
-        end 
+       end
+       
+       function addRelations(this, segComp , segn)
+            for k = this.relationship
+                comps = [];
+                for j = k.comps
+                    comps = [comps segComp(j)];
+                end
+                if k.order ~= 0
+                    segComp(k.addTo).addR(k.coefficient*this.t(segn)^k.order , 0 ,  comps );
+                end
+                segComp(k.addTo).addR( k.coefficient, k.order ,  comps );
+            end
+       end
+       
+       function calcSeries(this, segn , leftDuration )
+            newSegComp = this.f(1,:);
+            for k = 1 : size( this.f , 2 )
+                newSegComp(k) = comp( this.f(segn,k).func( leftDuration ) ) ;
+            end
+            this.addRelations(newSegComp , segn);
+       end
+       
+       function reset(this , segDuration)
+            resetTime = segDuration + this.t(this.seg);
+            this.t = [this.t resetTime];
+            newSegComp = this.f(1,:);
+            for k = 1 : size( this.f , 2 )
+                newSegComp(k) = comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ;
+            end
+            this.f = [this.f ; newSegComp];
+            this.seg = this.seg + 1;
+            this.addRelations(newSegComp, this.seg);  
+     
+       end
+        
+       function repeatCompute(this, order)
+            for k = 1 : order
+                for i = this.f(this.seg,:)
+                    i.compute();
+                end
+            end
+       end
     end
 end
