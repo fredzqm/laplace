@@ -24,9 +24,14 @@ classdef simulator < handle
         function compute(this , time)
             u = time / this.minResetTime ;
             repeatCompute(this.f(this.seg, :) , this.minOrder);
+            status = 0;
             for x = 1 : u
                 this.reset(this.minResetTime);
                 repeatCompute(this.f(this.seg, :) , this.minOrder);
+                if x/u - status > 0.01
+                    status = 0.01 + status;
+                    fprintf('Working ... %2d %% finished\n',uint8(status*100) );
+                end
             end
         end
         
@@ -60,6 +65,10 @@ classdef simulator < handle
         function plot(this , tt , compare)
             tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
             plot( tt , this.func(tt) , '-'  , tts , compare(tts) , '.');             
+        end
+        
+        function plotError(this , tt , compare)
+            plot( tt , this.func(tt)./compare(tt)-1 );             
         end
         
         function plotDeriv(this , tt , order)

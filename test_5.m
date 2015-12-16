@@ -18,6 +18,10 @@ s.plot( t , answer );
 % s.plotDeriv( t , 1);
 % s.plotDeriv( t , 2);
 
+%% plot error
+figure(3)
+s.plotError(t,answer);
+
 %%
 figure(2)
 hold off
