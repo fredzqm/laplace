@@ -70,25 +70,16 @@ classdef simulator < handle
         function vv = converge(this, t, kk , answer)
             vv = kk;
             aa = kk;
-<<<<<<< HEAD
             aa(:) = answer;
-=======
-            aa(:) = answer(t);
->>>>>>> 0d54de76d0e059573b8e6c182fa280ce93a6efbe
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
 %                 v = (-1)^k  * (kt)^(k+1) /  factorial(k);
 %                 v = (-1)^k / factorial(k) * (k/exp(1))^(k+1);
                 v = (-1)^k / sqrt(2*pi*k) * (k/exp(1));
-<<<<<<< HEAD
                 v = v * (exp(1)/t)^(k+1);
 %                 v = (-1)^k * (kt)^(k+1);
 %                 x = this.deriv(kt , k)
-=======
-                v = v * (exp(1)/t)^(k+1) ;
-%                 v = (-1)^k * (kt)^(k+1);
->>>>>>> 0d54de76d0e059573b8e6c182fa280ce93a6efbe
                 x = this.derivAcc(kt , k);
                 vv(i) = v * x;
             end

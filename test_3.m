@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 %% initialize sin( sqrt(t^2+1))
-=======
-%% initialize
->>>>>>> 0d54de76d0e059573b8e6c182fa280ce93a6efbe
 clear;
 s = simulator( [1 0 1] , 0 , ...
    [rel(1,1/2, 0, [1 3]) rel(1,-2, 1, 2) ...
