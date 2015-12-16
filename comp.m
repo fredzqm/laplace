@@ -55,15 +55,26 @@ classdef comp < handle
                 v = 0 ;
             elseif numComp == 1
                 v = k.comps(1).taylor(o);
+<<<<<<< HEAD
             elseif numComp == 2
                 v = convEnd(k.comps(2).taylor(1 : o) , k.comps(1).taylor(1 : o));
+=======
+>>>>>>> 0d54de76d0e059573b8e6c182fa280ce93a6efbe
             else
                 a = k.comps(numComp).taylor(1 : o);
                 while( numComp > 2 )
                     numComp = numComp - 1;
+<<<<<<< HEAD
                     a = convEqualLen(a , k.comps(numComp).taylor(1 : o));
                 end
                 v = convEnd(a , k.comps(1).taylor(1 : o));
+=======
+                    b = k.comps(numComp).taylor(1 : o); 
+                    a = convEqualLen(a , b);
+                end
+                b = k.comps(1).taylor(1 : o);
+                v = convEnd(a , b);
+>>>>>>> 0d54de76d0e059573b8e6c182fa280ce93a6efbe
             end
             v = v * k.coefficient ;
         end
