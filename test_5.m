@@ -1,8 +1,8 @@
 % 1/(s^2+1) -> sin(t)
 %% initialize
 clear;
-s = simulator( 1 , 0 , ...
-   [ rel(1,-2, 1, [1 1]) ] );
+s = simulator( {@(s)1/(s^2+1)} , 0 , ...
+   [rel(1,-2, 1, [1 1]) ] );
 
 %% compute
 s.minOrder = 10;
@@ -22,10 +22,10 @@ s.plot( t , answer );
 figure(3)
 s.plotError(t,answer);
 
-%%
+%% convergence
 figure(2)
 hold off
 t = 25;
-kk = 1 : 180;
+kk = 1 : 300;
 answer = sin(t);
 vv = s.converge(t,kk , answer);

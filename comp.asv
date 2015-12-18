@@ -12,18 +12,17 @@ classdef comp < handle
     end
     
     methods
-        % init is the initial value of comp unit
+        % init is the 
         function newComp = comp( init )
             newComp.rel = [];
             newComp.taylor = init;
             newComp.taylor2 = init;
         end
-        
+        %
         function v = get.len(this)
             v = size(this.taylor , 2) ;
         end
         
-        % append another term of taylor's series
         function [this] = add( this, value )
             this.taylor2(this.len + 1 ) = value * factorial(this.len);
             this.taylor(this.len + 1 ) = value;
@@ -38,7 +37,6 @@ classdef comp < handle
             this.rel = [this.rel newAdd]; 
         end
         
-        % compute all relatioins for this term and sum them up
         function [this] = compute(this)
             next = 0;
             for  k = this.rel
@@ -47,7 +45,6 @@ classdef comp < handle
             this.add(next / this.len );
         end
         
-        % compute the result of one relation
         function v = computeItem( this ,  k )
             o = this.len - k.order;
             if o < 1
@@ -72,8 +69,6 @@ classdef comp < handle
             v = v * k.coefficient ;
         end
         
-        % calculate the value of taylor series at certain point
-        % taylor1 (potential source of underflow)
         function v = func(this, t )
             v = this.taylor(this.len) ;
             for  i = this.len - 1  : -1 : 1
@@ -81,8 +76,6 @@ classdef comp < handle
             end
         end
         
-        % calculate the value of taylor series at certain point
-        % using taylor2
         function v = deriv(this, t , k )
             v = this.taylor2(this.len) ;
             for  i = this.len - 1 : -1 : k + 1
@@ -92,7 +85,7 @@ classdef comp < handle
     end       
 end
 
-% convolution two array of the same size, return the last term
+
 function v = convEnd( a , b)
     v = 0;
     len = size( a , 2 );
@@ -101,7 +94,6 @@ function v = convEnd( a , b)
     end
 end
 
-% convolution two array of the same size, return the whole array
 function v = convEqualLen( a , b )
     len = size(a,2);
     v = zeros(1 , len);
