@@ -4,7 +4,7 @@ classdef comp < handle
     properties
         rel ; % relationship to other component
         taylor ; % taylor series fixed now
-        taylor2 ;
+        taylor2 ; % TODO: implement taylor2 and avoid underflow
     end
     
     properties (Dependent)
