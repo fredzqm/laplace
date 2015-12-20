@@ -36,10 +36,10 @@ classdef simulator < handle
                 repeatCompute(this.f(this.seg, :) , this.minOrder);
                 if x/u - status > 0.01
                     status = x/u;
-                    fprintf('Computing ... %2d %%\n',uint8(status*100) );
+                    fprintf('Computing ... %2d %%\n', uint8(status*100));
                 end
             end
-            fprintf('Computing ... 100%%\n');
+            fprintf('Finish computing\n');
         end
         
         % calculate the value of time array tt
@@ -52,7 +52,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).deriv(tt(i) - this.t(segn) , 0);
+                vv(i) = this.f(segn , 1).calc( tt(i) - this.t(segn) , 0);
             end
         end
         
@@ -66,7 +66,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
+                vv(i) = this.f(segn , 1).calc( tt(i) - this.t(segn) , k );
                 continue;
             end
         end
@@ -147,7 +147,7 @@ classdef simulator < handle
             this.t = [this.t resetTime];
             newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
-                newSegComp(k) = comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ;
+                newSegComp(k) = comp( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;

@@ -65,32 +65,14 @@ classdef comp < handle
             end
             v = v * k.coefficient ;
         end
-        
-        % calculate the value of taylor series at certain point
-        % taylor1 (potential source of underflow)
-        function v = func(this, t )
-            v = this.taylor(this.len) ;
-            for  i = this.len - 1  : -1 : 1
-                v = v * t + this.taylor(i) ;
-            end
-        end
-        
+                
         % calculate the value of taylor series at certain point
         % using taylor2
-        function v = deriv(this, t , k )
+        function v = calc(this, t , k )
             v = this.taylor2(this.len) ;
             for  i = this.len - 1 : -1 : k + 1
                 v = v * t / (i - k) + this.taylor2( i ) ;
             end
         end
     end       
-end
-
-% convolution two array of the same size, return the last term
-function v = convEnd( a , b)
-    v = 0;
-    len = size( a , 2 );
-    for i = 1 : len
-        v = v + a(i) * b(len-i+1);
-    end
 end
