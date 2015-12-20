@@ -39,6 +39,7 @@ classdef simulator < handle
                     fprintf('Computing ... %2d %%\n',uint8(status*100) );
                 end
             end
+            fprintf('Computing ... 100%%\n');
         end
         
         % calculate the value of time array tt
