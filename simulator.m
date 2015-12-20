@@ -35,7 +35,7 @@ classdef simulator < handle
                 this.reset(this.minResetTime);
                 repeatCompute(this.f(this.seg, :) , this.minOrder);
                 if x/u - status > 0.01
-                    status = 0.01 + status;
+                    status = x/u;
                     fprintf('Computing ... %2d %%\n',uint8(status*100) );
                 end
             end
@@ -51,7 +51,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).func(tt(i) - this.t(segn));
+                vv(i) = this.f(segn , 1).deriv(tt(i) - this.t(segn) , 0);
             end
         end
         
