@@ -21,6 +21,6 @@ s.plot( t , answer );
 figure(2)
 hold off
 t = 2;
-kk = 1 : 30;
+kk = 1 : 200;
 answer = exp(-a*t);
-vv = s.converge(t,kk , answer);
+vv = s.converge(t,kk,answer);

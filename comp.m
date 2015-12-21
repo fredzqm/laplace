@@ -61,7 +61,7 @@ classdef comp < handle
                 v = k.comps(1).taylor2(o);
             else
                 for i = 1 : o
-                    v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i-1, o-i);
+                    v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
                 end
             end
             v = v * k.coefficient * multFactor.second( o, this.len-1 );

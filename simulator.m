@@ -101,12 +101,12 @@ classdef simulator < handle
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
-%                 v = (-1)^k  * (kt)^(k+1) /  factorial(k);
+                v = (-1)^k  * (kt)^(k+1) /   factorial(k);
             % two lines below are essentially the same when k is big, using
             % stiring approximation
 %               v = (-1)^k / factorial(k) * (k/exp(1))^(k+1);
-                v = (-1)^k / sqrt(2*pi*k) * (k/exp(1)); %
-                v = v * (exp(1)/t)^(k+1);
+%                 v = (-1)^k / sqrt(2*pi*k) * (k/exp(1)); %
+%                 v = v * (exp(1)/t)^(k+1);
 %               v = (-1)^k * (kt)^(k+1);
 %               x = this.deriv(kt , k)  
                 x = this.derivAcc(kt , k);
