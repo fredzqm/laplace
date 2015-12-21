@@ -100,17 +100,12 @@ classdef simulator < handle
             aa(:) = answer;
             for i = 1 : size(kk,2)
                 k = kk(i);
-%                 v = (-1)^k  * (kt)^(k+1) /   factorial(k);
-            % two lines below are essentially the same when k is big, using
-            % stiring approximation
-%               v = (-1)^k / factorial(k) * (k/exp(1))^(k+1);
-%                 v = (-1)^k / sqrt(2*pi*k) * (k/exp(1)); %
-%                 v = v * (exp(1)/t)^(k+1);
-%               v = (-1)^k * (kt)^(k+1);
-%               x = this.deriv(kt , k) 
-                v = multFactor.third(k, t);
-                x = this.derivAcc(k / t , k);
-                vv(i) = v * x;
+                kt = k / t;
+%               a = (-1)^k  * (kt)^(k+1) /   factorial(k)
+                a = multFactor.stir(k) ;
+                b = (-1)^k * t ^(k+1) ;
+                c = this.derivAcc(kt , k) ;
+                vv(i) = a*b*c;
             end
             plot(kk , vv ,'-', kk , aa , '.');
         end

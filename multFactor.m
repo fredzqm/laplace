@@ -55,18 +55,10 @@ classdef multFactor
 %              m = data(a,b);
         end
         
-        function m = third(k , t)
-            m = multFactor.stir(k) ;
-            m = m / t^(k+1);
-            if mode(k,2) == 1
-                m = -m ;
-            end
-        end
-        
         function m = stir(k)
             persistent data;
             s = size( data );
-%             if s(2) < k || data(k) == 0
+            if s(2) < k || data(k) == 0
                 if k < 120
                     data(k) = k ^(k+1) / factorial(k) ;
                 else
@@ -83,7 +75,7 @@ classdef multFactor
                         end
                         b = b * b;
                     end
-%                     fprintf( 'is %f n:%d f:%d m:%5f\n', log( m * b^n / factorial(f) ) , n , f , log(m) / log(10) );
+%                   fprintf( 'is %f n:%d f:%d m:%5f\n', log( m * b^n / factorial(f) ) , n , f , log(m) / log(10) );
                     while( n > 0 || f > 1)
                         while( f > 1 && m >= multFactor.stirlingLower )
                             m = m / f;
@@ -98,7 +90,7 @@ classdef multFactor
                      end
                     data(k) = m;
                 end
-%             end
+            end
             m = data(k);
         end
     end
