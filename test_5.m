@@ -15,8 +15,8 @@ hold off
 answer = @(x) 1 ./(x.*x + 1);
 t = 1 :0.01: 10 ;
 s.plot( t , answer );
-s.plotDeriv( t , 1);
-s.plotDeriv( t , 2);
+% s.plotDeriv( t , 1);
+% s.plotDeriv( t , 2);
 
 %% plot error
 figure(3)
@@ -26,6 +26,6 @@ s.plotError(t,answer);
 figure(2)
 hold off
 t = 25;
-kk = 1 : 300;
+kk = 1 : 170;
 answer = sin(t);
 vv = s.converge(t,kk , answer);

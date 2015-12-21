@@ -3,7 +3,7 @@ classdef comp < handle
     %   Detailed explanation goes here
     properties
         rel ; % relationship to other component
-        taylor ; % taylor series fixed now
+%         taylor ; % taylor series fixed now
         taylor2 ;
     end
     
@@ -15,18 +15,19 @@ classdef comp < handle
         % init is the initial value of comp unit
         function newComp = comp( init )
             newComp.rel = [];
-            newComp.taylor = init;
+%             newComp.taylor = init;
             newComp.taylor2 = init;
         end
         
         function v = get.len(this)
-            v = size(this.taylor , 2) ;
+%             v = size(this.taylor , 2) ;
+            v = size(this.taylor2 , 2) ;
         end
         
         % append another term of taylor's series
         function [this] = add( this, value )
-            this.taylor2(this.len + 1 ) = value * factorial(this.len);
-            this.taylor(this.len + 1 ) = value;
+%             this.taylor2(this.len + 1 ) = value * factorial(this.len);
+            this.taylor2(this.len + 1 ) = value;
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
@@ -44,7 +45,8 @@ classdef comp < handle
             for  k = this.rel
                 next = next + this.computeItem( k );
             end
-            this.add(next / this.len );
+%             this.add(next / this.len );
+            this.add(next);
         end
         
         % compute the result of one relation
@@ -54,16 +56,15 @@ classdef comp < handle
                 v = 0;
                 return;
             end
-            numComp = size( k.comps , 2 );
             v = 0 ;
-            if numComp == 1
-                v = k.comps(1).taylor(o);
+            if size( k.comps , 2 ) == 1
+                v = k.comps(1).taylor2(o);
             else
                 for i = 1 : o
-                    v = v + k.comps(2).taylor(i) * k.comps(1).taylor(o-i+1);
+                    v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i-1, o-i);
                 end
             end
-            v = v * k.coefficient ;
+            v = v * k.coefficient * multFactor.second( o, this.len-1 );
         end
                 
         % calculate the value of taylor series at certain point
