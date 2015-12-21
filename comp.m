@@ -68,10 +68,10 @@ classdef comp < handle
                 
         % calculate the value of taylor series at certain point
         % using taylor2
-        function v = calc(this, t , k )
+        function v = calc(this, t , derivOrder )
             v = this.taylor2(this.len) ;
-            for  i = this.len - 1 : -1 : k + 1
-                v = v * t / (i - k) + this.taylor2( i ) ;
+            for  i = this.len - 1 : -1 : derivOrder + 1
+                v = v * t / (i - derivOrder) + this.taylor2( i ) ;
             end
         end
     end       
