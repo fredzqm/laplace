@@ -26,6 +26,6 @@ s = simulator( {@(s)1/(s^2+1)} , 0 , ...
 figure(2)
 hold off
 t = 25;
-kk = 100 : 10 : 200;
+kk = 1 : 50 : 1000;
 answer = sin(t);
 vv = s.converge(t,kk , answer);

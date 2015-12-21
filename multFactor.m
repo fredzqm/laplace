@@ -35,60 +35,33 @@ classdef multFactor
         end
         
         function m = second(a,b)
-%              persistent data;
-%              if a > b
-%                  m = 1;
-%                  return
-%              end
-%              s = size( data );
-%              if ( a > s(1)  || b > s(2) || data(a,b) == 0)
-%                 if b - a < 2
-                    m = 1;
-                    for x = a : b
-                        m = m * x;
-                    end
-%                     data(a,b) = m;
-%                 else
-%                     data(a,b) = multFactor.second(a,b-1) * b;
-%                 end
-%              end
-%              m = data(a,b);
+            m = 1;
+            for x = a : b
+                m = m * x;
+            end
         end
         
         function m = stir(k)
             persistent data;
             s = size( data );
             if s(2) < k || data(k) == 0
-                if k < 120
-                    data(k) = k ^(k+1) / factorial(k) ;
+                data(k) = (k+1)*log(k) - multFactor.logfactorial(k);
+            end
+            m = data(k);
+        end
+        
+        function m = logfactorial(k)
+            persistent data;
+            if k <= 0
+                m = 1;
+                return;
+            end
+            s = size( data );
+            if s(2) < k || data(k) == 0
+                if ( k < 120 )
+                    data(k) = log( factorial(k) );
                 else
-                    m = 1;
-                    n = k + 1;
-                    b = k;
-                    f = k;
-                    while(b <= multFactor.stirlingUpper2)
-                        if mod(n,2) == 1
-                            m = m * b;
-                            n = (n-1) / 2;
-                        else
-                            n = n / 2;
-                        end
-                        b = b * b;
-                    end
-%                   fprintf( 'is %f n:%d f:%d m:%5f\n', log( m * b^n / factorial(f) ) , n , f , log(m) / log(10) );
-                    while( n > 0 || f > 1)
-                        while( f > 1 && m >= multFactor.stirlingLower )
-                            m = m / f;
-                            f = f - 1;
-                        end
-%                         fprintf( 'b %f n:%d f:%d m:%5f\n', log( m * b^n / factorial(f) ) , n , f , log(m) / log(10) );
-                        while( n > 0 && m <= multFactor.stirlingUpper)
-                            m = b * m ;
-                            n = n - 1;
-                        end
-%                         fprintf( 'a %f n:%d f:%d m:%5f\n', log( m * b^n / factorial(f) ) , n , f , log(m) / log(10) );
-                     end
-                    data(k) = m;
+                    data(k) = multFactor.logfactorial(k-1) + log(k);
                 end
             end
             m = data(k);

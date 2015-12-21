@@ -101,11 +101,15 @@ classdef simulator < handle
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
-%               a = (-1)^k  * (kt)^(k+1) /   factorial(k)
-                a = multFactor.stir(k) ;
-                b = (-1)^k * t ^(k+1) ;
-                c = this.derivAcc(kt , k) ;
-                vv(i) = a*b*c;
+%               a = (-1)^k  * (kt)^(k+1) / factorial(k)
+                a = multFactor.stir(k);
+                b = (k+1) * log(t);
+                c = this.derivAcc(kt , k);
+%               vv(i) = a / exp(b) * abs(c);
+                vv(i) = exp( a - b + log(abs(c)) );
+                if (c > 0) == mod(k,2) 
+                    vv(i) = - vv(i);
+                end
             end
             plot(kk , vv ,'-', kk , aa , '.');
         end
@@ -119,7 +123,8 @@ classdef simulator < handle
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-            v = newSegComp(1).taylor2(k+1);
+            v = newSegComp(1).taylor2(k+1)
+            w = v/factorial(k)
         end
     end
     

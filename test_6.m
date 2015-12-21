@@ -11,7 +11,7 @@ s = simulator( {@(s)s/(s*s+1) @(s)1/(s+1)} , 0, ...
 % s.compute(10);
 % 
 % %% plot taylor
-% figure(1),LLLLLLLLLLLLLLLLLLL
+% figure(1)
 % hold off
 % answer = @(x) x ./(x.*x + 1);
 % t = 0.5 :0.01: 10 ;

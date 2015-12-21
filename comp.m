@@ -66,7 +66,7 @@ classdef comp < handle
             end
             v = v * k.coefficient * multFactor.second( o, this.len-1 );
         end
-                
+        
         % calculate the value of taylor series at certain point
         % using taylor2
         function v = calc(this, t , derivOrder )
