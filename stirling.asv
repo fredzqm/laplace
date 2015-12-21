@@ -1,13 +1,13 @@
-tt = 0 : 300 ;                     
-real = tt;
-appr = tt;
-erro = tt;
+clear
+tt = 100 : 300 ;                     
+d(3,:) = tt;
 for i = 1 : size(tt , 2)
-    n = tt(i);
-    real(i) = log( factorial(n) );
-    appr(i) = n*log(n) - n;
-    erro(i) = factorial(n) / exp( n*log(n) - n ) ;
+    k = tt(i);
+    d(1, i) = log( k ^(k+1) / factorial(k));
+    d(2, i) = log( multFactor.stir(k);
+    d(3, i) = d(1, i) / d(2, i);
 %     erro(i) = factorial(n) / exp( n*log(n) - n ) ;
 end
-plot( tt , erro , 'b' , tt , log(tt) , 'y', tt , appr/100 , 'r' ,tt, real/100 , 'g');
-% plot(tt, real, tt, appr);
+% plot( tt , d(3 ,:) , 'b');
+% plot(tt, d(1, :));
+plot(tt, d(2, :));
