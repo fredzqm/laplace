@@ -1,4 +1,4 @@
-classdef comp < handle
+classdef comp2 < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
@@ -13,7 +13,7 @@ classdef comp < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = comp( init )
+        function newComp = comp2( init )
             newComp.rel = [];
 %             newComp.taylor = init;
             newComp.taylor2 = init;

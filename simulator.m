@@ -3,7 +3,7 @@ classdef simulator < handle
     properties (SetAccess = public)
         relation; % calculate relationship between comps
         funct; % ideal function of each term 
-        f = comp(1); % comps used to calcuate taylor series
+        f = getCompUnit(1); % comps used to calcuate taylor series
         t ; % start time of each segment
         seg; % the last segment
         minResetTime = 0.05; % default minResetTime
@@ -19,7 +19,7 @@ classdef simulator < handle
             created.funct = funct;
             created.relation = relation;
             for i = 1 : size(funct, 2)
-                created.f(i) = comp( funct{i}(initTime) );
+                created.f(i) = getCompUnit( funct{i}(initTime) );
             end
             created.seg = 1;
             addRelations(relation , created.f, initTime);
@@ -28,8 +28,8 @@ classdef simulator < handle
         
         % compute a certain time given the minResetTime and minorder 
         function compute(this , time)
-            u = time / this.minResetTime ;
             repeatCompute(this.f(this.seg, :) , this.minOrder);
+            u = time / this.minResetTime ;
             status = 0;
             for x = 1 : u
                 this.reset(this.minResetTime);
@@ -98,6 +98,8 @@ classdef simulator < handle
             vv = kk;
             aa = kk;
             aa(:) = answer;
+            stepSize = 60;
+            next = 0;
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
@@ -110,7 +112,12 @@ classdef simulator < handle
                 if (c > 0) == mod(k,2) 
                     vv(i) = - vv(i);
                 end
+                if k >=  next
+                    next = (floor(kk(i)/stepSize)+1) * stepSize;
+                    fprintf('Computing converge ... %2d \n', k);
+                end
             end
+            fprintf('Finish computing converge\n');
             plot(kk , vv ,'-', kk , aa , '.');
         end
         
@@ -119,13 +126,13 @@ classdef simulator < handle
         function v = derivAcc(this , t , k)
             newSegComp = this.f(1,:);
             for q = 1 : size( this.funct , 2 )
-                newSegComp(q) = comp( this.funct{q}(t) ) ;
+                newSegComp(q) = getCompUnit( this.funct{q}(t) ) ;
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-            k
-            v = newSegComp(1).taylor2(k+1)
-            factorial(k)
+%             k
+            v = newSegComp(1).taylor2(k+1);
+%             factorial(k)
         end
     end
     
@@ -148,7 +155,7 @@ classdef simulator < handle
             this.t = [this.t resetTime];
             newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
-                newSegComp(k) = comp( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
+                newSegComp(k) = getCompUnit( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
@@ -181,3 +188,9 @@ function repeatCompute(comps, order)
         end
     end
 end
+
+
+function ret = getCompUnit(init)
+    ret = comp2(init);
+end
+
