@@ -103,9 +103,10 @@ classdef simulator < handle
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
-%               a = (-1)^k  * (kt)^(k+1) / factorial(k)
+%               a is calculated use the following formula. They are constants
+%               a = log( (k)^(k+1) / factorial(k) )
                 a = multFactor.stir(k);
-                b = (k+1) * log(t);
+                b = (k+1) * log(t); 
                 c = this.derivAcc(kt , k);
 %               vv(i) = a / exp(b) * abs(c);
                 vv(i) = exp( a - b + log(abs(c)) );
@@ -114,7 +115,7 @@ classdef simulator < handle
                 end
                 if k >=  next
                     next = (floor(kk(i)/stepSize)+1) * stepSize;
-                    fprintf('Computing converge ... %2d \n', k);
+                    fprintf('Computing converge ... k = %2d \n', k);
                 end
             end
             fprintf('Finish computing converge\n');
@@ -189,8 +190,9 @@ function repeatCompute(comps, order)
     end
 end
 
-
+% make comp more generic, so we can test the same case with different
+% versions of comps.
 function ret = getCompUnit(init)
-    ret = comp2(init);
+    ret = comp2 (init);
 end
 

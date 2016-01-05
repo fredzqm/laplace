@@ -1,9 +1,10 @@
-classdef comp2 < handle
+classdef comp3 < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
         rel ; % relationship to other component
-        taylor2 ; % taylor series, coe*k^n/n!
+        taylor3 ; % taylor series, log(|coe|), coe*k^n/n!, 
+        taylor3sign;
     end
     
     properties (Dependent)
@@ -12,19 +13,25 @@ classdef comp2 < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = comp2( init )
+        function newComp = comp3( init )
             newComp.rel = [];
-            newComp.taylor2 = init;
+            newComp.taylor3 = log(abs(init));
+            newComp.taylor3sign = sign(init);
         end
         
         function v = get.len(this)
-            v = size(this.taylor2 , 2) ;
+            v = size(this.taylor3 , 2) ;
+        end
+        
+        function coe = taylor2(this, order)
+            coe = exp(this.taylor3(order)) * this.taylor3sign(order);
         end
         
         % append another term of taylor's series
-        function [this] = add( this, value )
+        function [this] = add( this, value , sign )
 %             this.taylor2(this.len + 1 ) = value * factorial(this.len);
-            this.taylor2(this.len + 1 ) = value;
+            this.taylor3(this.len + 1 ) = value;
+            this.taylor3sign(this.len + 1 ) = sign;
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
@@ -40,9 +47,10 @@ classdef comp2 < handle
         function [this] = compute(this)
             next = 0;
             for  k = this.rel
+                % TODO:
                 next = next + this.computeItem( k );
             end
-            this.add(next);
+            this.add(next , sign);
         end
         
         % compute the result of one relation
@@ -53,13 +61,26 @@ classdef comp2 < handle
                 return;
             end
             v = 0 ;
+            
             if size( k.comps , 2 ) == 1
                 v = k.comps(1).taylor2(o);
             else
-                for i = 1 : o
-                    v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
-                end
+                a = k.comps(1).taylor2(1:o);
+                as = k.comps(1).taylor3(1:o);
+                b = fliplr( k.comps(2).taylor2(1:o) );
+                bs = fliplr( k.comps(2).taylor3(1:o) );
+                mf = multFactor.firstList(o);
+                s = as .* bs;
+                vv = a + b + mf;
+                vfactor = (min(vv) + max(vv)) / 2;
+                vv = vv - vfactor;
+                vv = exp(vv);
+                sum(vv) ;
+%                 for i = 1 : o
+%                     v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
+%                 end
             end
+            
             v = v * k.coefficient * multFactor.second( o, this.len-1 );
         end
         
