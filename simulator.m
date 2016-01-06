@@ -107,7 +107,7 @@ classdef simulator < handle
 %               a = log( (k)^(k+1) / factorial(k) )
                 a = multFactor.stir(k);
                 b = (k+1) * log(t); 
-                c = this.derivAcc(kt , k);
+                c = this.derivAcc(kt , k)
 %               vv(i) = a / exp(b) * abs(c);
                 vv(i) = exp( a - b + log(abs(c)) );
                 if (c > 0) == mod(k,2) 
@@ -193,6 +193,6 @@ end
 % make comp more generic, so we can test the same case with different
 % versions of comps.
 function ret = getCompUnit(init)
-    ret = comp2 (init);
+    ret = comp3 (init);
 end
 

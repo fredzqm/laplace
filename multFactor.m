@@ -34,6 +34,24 @@ classdef multFactor
             m = data(a,b);
         end
         
+        function m = firstList(n)
+            persistent data;
+            if n == 0
+                m = [];
+                return;
+            end
+            s = size( data , 2);
+            if( n > s )
+                next = multFactor.firstList(n-1);
+                for i = 1 : n-1
+                    next(i , 1) = next(i , 1) + log((n-1)/(n-i));
+                end
+                next(n , 1) = 0;
+                data{n} = next;
+            end
+            m = data{n};
+        end
+        
         function m = second(a,b)
             m = 1;
             for x = a : b

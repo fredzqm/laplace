@@ -3,8 +3,8 @@ classdef comp3 < handle
     %   Detailed explanation goes here
     properties
         rel ; % relationship to other component
-        taylor3 ; % taylor series, log(|coe|), coe*k^n/n!,
-        % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
+        taylor3 ; % taylor series, log(|coe|), coe*k^n/n!, 
+        taylor3sign;
     end
     
     properties (Dependent)
@@ -15,23 +15,23 @@ classdef comp3 < handle
         % init is the initial value of comp unit
         function newComp = comp3( init )
             newComp.rel = [];
-            newComp.taylor3(1,1) = log(abs(init));
-            newComp.taylor3(1,2) = sign(init);
+            newComp.taylor3 = log(abs(init));
+            newComp.taylor3sign = sign(init);
         end
         
         function v = get.len(this)
-            v = size(this.taylor3 , 1) ;
+            v = size(this.taylor3 , 2) ;
         end
         
         function coe = taylor2(this, order)
-            coe = exp(this.taylor3(order , 1)) * this.taylor3(order , 2);
+            coe = exp(this.taylor3(order)) * this.taylor3sign(order);
         end
         
         % append another term of taylor's series
         function [this] = add( this, value , sign )
 %             this.taylor2(this.len + 1 ) = value * factorial(this.len);
-            this.taylor3(this.len + 1 , 1) = value;
-            this.taylor3(this.len + 1 , 2) = sign;
+            this.taylor3(this.len + 1 ) = value;
+            this.taylor3sign(this.len + 1 ) = sign;
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
@@ -45,22 +45,18 @@ classdef comp3 < handle
         
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
-            if size(this.rel, 2) > 1
-                next = zeros( size(this.rel, 2), 2);
-                for i = 1 : size(this.rel, 2)
-                    [v, s] = this.computeItem( this.rel(i) );
-                    next(i, 1) = v;
-                    next(i, 2) = s;
-                end
-                ave = mean(next(:,1));
-                next(:,1) = next(:,1) - ave;
-                next(:,1) = exp(next(:,1)) .* next(:,2);
-                value = sum(next(:,1));
-                this.add(log(value) + ave , sign(value) );
-            else
-                [v, s] = this.computeItem( this.rel(1) );
-                this.add( v , s );
+            next = zeros( size(this.rel, 2), 2);
+            for i = 1 : size(this.rel, 2)
+                % TODO:
+                [v, s] = this.computeItem( this.rel(i) );
+                next(i, 1) = v;
+                next(i, 2) = s;
             end
+            ave = mean(next(:,1));
+            next(:,1) = next(:,1) - ave;
+            next(:,1) = exp(next(:,1))*;
+            
+            this.add(next , sign);
         end
         
         % compute the result of one relation
@@ -68,26 +64,30 @@ classdef comp3 < handle
             o = this.len - k.order;
             if o < 1
                 v = 0;
-                s = 0;
                 return;
             end
+            v = 0 ;
+            
             if size( k.comps , 2 ) == 1
-                v = k.comps(1).taylor3(o , 1);
-                s = k.comps(1).taylor3(o , 2);
+                v = k.comps(1).taylor2(o);
             else
-                a = k.comps(1).taylor3(1:o , :);
-                b = flipud( k.comps(2).taylor3(1:o , :) );
+                a = k.comps(1).taylor2(1:o);
+                as = k.comps(1).taylor3(1:o);
+                b = fliplr( k.comps(2).taylor2(1:o) );
+                bs = fliplr( k.comps(2).taylor3(1:o) );
                 mf = multFactor.firstList(o);
-                ss = a(:,2) .* b(:,2);
-                vv = a(:,1) + b(:,1) + mf;
-                ave = mean(vv);
-                vv = vv - ave;
-                vv = exp(vv) .* ss;
-                v = sum(vv);
-                s = sign(v);
-                v = log(abs(v)) + ave;
+                s = as .* bs;
+                vv = a + b + mf;
+                vfactor = (min(vv) + max(vv)) / 2;
+                vv = vv - vfactor;
+                vv = exp(vv);
+                sum(vv) ;
+%                 for i = 1 : o
+%                     v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
+%                 end
             end
-            v = v + log(k.coefficient * multFactor.second( o, this.len-1 ));
+            
+            v = v * k.coefficient * multFactor.second( o, this.len-1 );
         end
         
         % calculate the value of taylor series at certain point
