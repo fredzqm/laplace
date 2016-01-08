@@ -18,9 +18,8 @@ classdef comp2 < handle
         end
         
         function v = get.len(this)
-            v = size(this.taylor2 , 2) ;
+            v = size(this.taylor2 , 2);
         end
-        
         % append another term of taylor's series
         function [this] = add( this, value )
 %             this.taylor2(this.len + 1 ) = value * factorial(this.len);

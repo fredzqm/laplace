@@ -17,7 +17,7 @@ s = simulator( {@(s)1/(s^2+1)} , 0 , ...
 % s.plot( t , answer );
 % % s.plotDeriv( t , 1);
 % % s.plotDeriv( t , 2);
-% 
+%
 % %% plot error
 % figure(3)
 % s.plotError(t,answer);
