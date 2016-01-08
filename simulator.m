@@ -107,10 +107,9 @@ classdef simulator < handle
 %               a = log( (k)^(k+1) / factorial(k) )
                 a = multFactor.stir(k);
                 b = (k+1) * log(t); 
-                c = this.derivAcc(kt , k);
-%               vv(i) = a / exp(b) * abs(c);
-                vv(i) = exp( a - b + log(abs(c)) );
-                if (c > 0) == mod(k,2) 
+                [c , s]= this.derivAcclog(kt , k);
+                vv(i) = exp( a - b + c );
+                if (s > 0) == mod(k,2) 
                     vv(i) = - vv(i);
                 end
                 if k >=  next
@@ -122,17 +121,32 @@ classdef simulator < handle
             plot(kk , vv ,'-', kk , aa , '.');
         end
         
-        % create an array of comps and calculate the conrresponding
-        % derivative
-        function v = derivAcc(this , t , k)
+        function [v , s] = derivAcclog(this , t , k)
             newSegComp = this.f(1,:);
             for q = 1 : size( this.funct , 2 )
                 newSegComp(q) = getCompUnit( this.funct{q}(t) ) ;
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-            v = newSegComp(1).taylor2(k+1);
+            % choose between (1.comp3) and (2.comp1 or comp1)
+                v = newSegComp(1).taylor3(k+1 , 1);
+                s = newSegComp(1).taylor3(k+1 , 2);
+%                 v = newSegComp(1).taylor2(k+1);
+%                 s = sign(v);
+%                 v = log(abs(v));
         end
+        
+        % create an array of comps and calculate the conrresponding
+        % derivative
+%         function v = derivAcc(this , t , k)
+%             newSegComp = this.f(1,:);
+%             for q = 1 : size( this.funct , 2 )
+%                 newSegComp(q) = getCompUnit( this.funct{q}(t) ) ;
+%             end
+%             addRelations(this.relation , newSegComp , t );
+%             repeatCompute(newSegComp, k);
+%             v = newSegComp(1).taylor2(k+1);
+%         end
     end
     
     

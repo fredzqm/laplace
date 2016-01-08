@@ -46,14 +46,6 @@ classdef comp3 < handle
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
             if size(this.rel, 2) > 1
-%                 next = 0;
-%                 for i = 1 : size(this.rel, 2)
-%                     [v, s] = this.computeItem( this.rel(i) );
-%                     next = next + exp(v) * s;
-%                 end
-%                 s = sign(next);
-%                 v = log(abs(next));
-%                 this.add( v, s);
                 next = zeros( size(this.rel, 2), 2);
                 for i = 1 : size(this.rel, 2)
                     [v, s] = this.computeItem( this.rel(i) );
@@ -83,12 +75,6 @@ classdef comp3 < handle
                 v = k.comps(1).taylor3(o , 1);
                 s = k.comps(1).taylor3(o , 2);
             else
-%                 v = 0;
-%                 for i = 1 : o
-%                     v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
-%                 end
-%                 s = sign(v);
-%                 v = log(abs(v));
                 a = k.comps(1).taylor3(1:o , :);
                 b = flipud( k.comps(2).taylor3(1:o , :) );
                 mf = multFactor.firstList(o);
