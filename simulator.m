@@ -128,12 +128,16 @@ classdef simulator < handle
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-            % choose between (1.comp3) and (2.comp1 or comp1)
+% comp1 & comp2
+%                 v = newSegComp(1).taylor2(k+1);
+%                 s = sign(v);
+%                 v = log(abs(v));
+% comp3
 %                 v = newSegComp(1).taylor3(k+1 , 1);
 %                 s = newSegComp(1).taylor3(k+1 , 2);
-                v = newSegComp(1).taylor2(k+1);
-                s = sign(v);
-                v = log(abs(v));
+% comp4
+                v = newSegComp(1).taylor3(k+1 , 1) +  multFactor.logfactorial(k);
+                s = newSegComp(1).taylor3(k+1 , 2);
         end
         
         % create an array of comps and calculate the conrresponding
@@ -205,6 +209,6 @@ end
 % make comp more generic, so we can test the same case with different
 % versions of comps.
 function ret = getCompUnit(init)
-    ret = comp1(init);
+    ret = comp4(init);
 end
 
