@@ -29,8 +29,9 @@ classdef comp3 < handle
         
         % append another term of taylor's series
         function [this] = add( this, v , s )
-            this.taylor3(this.len + 1 , 1) = v;
-            this.taylor3(this.len + 1 , 2) = s;
+            l = this.len + 1;
+            this.taylor3(l , 1) = v;
+            this.taylor3(l , 2) = s;
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
@@ -45,27 +46,25 @@ classdef comp3 < handle
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
             if size(this.rel, 2) > 1
-                 next = 0;
-                for i = 1 : size(this.rel, 2)
-                    [v, s] = this.computeItem( this.rel(i) );
-                    next = next + exp(v) * s;
-                end
-                s = sign(next);
-                v = log(abs(next));
-                this.add(v, s);
-%                 next = zeros( size(this.rel, 2), 2);
+%                 next = 0;
 %                 for i = 1 : size(this.rel, 2)
 %                     [v, s] = this.computeItem( this.rel(i) );
-%                     next(i, 1) = v;
-%                     next(i, 2) = s;
+%                     next = next + exp(v) * s;
 %                 end
-%                 next
-%                 error('ok');
-%                 ave = mean(next(:,1));
-%                 next(:,1) = next(:,1) - ave;
-%                 next(:,1) = exp(next(:,1)) .* next(:,2);
-%                 value = sum(next(:,1));
-%                 this.add(log(value) + ave , sign(value) );
+%                 s = sign(next);
+%                 v = log(abs(next));
+%                 this.add( v, s);
+                next = zeros( size(this.rel, 2), 2);
+                for i = 1 : size(this.rel, 2)
+                    [v, s] = this.computeItem( this.rel(i) );
+                    next(i, 1) = v;
+                    next(i, 2) = s;
+                end
+                ave = max(next(:,1));
+                next(:,1) = next(:,1) - ave;
+                next(:,1) = exp(next(:,1)) .* next(:,2);
+                value = sum(next(:,1));
+                this.add(log(abs(value)) + ave , sign(value) );
             else
                 [v, s] = this.computeItem( this.rel(1) );
                 this.add( v , s );
@@ -84,25 +83,28 @@ classdef comp3 < handle
                 v = k.comps(1).taylor3(o , 1);
                 s = k.comps(1).taylor3(o , 2);
             else
-                v = 0;
-                for i = 1 : o
-                    v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
-                end
+%                 v = 0;
+%                 for i = 1 : o
+%                     v = v + k.comps(2).taylor2(i) * k.comps(1).taylor2(o-i+1) * multFactor.first(i,o-i+1);
+%                 end
+%                 s = sign(v);
+%                 v = log(abs(v));
+                a = k.comps(1).taylor3(1:o , :);
+                b = flipud( k.comps(2).taylor3(1:o , :) );
+                mf = multFactor.firstList(o);
+                ss = a(:,2) .* b(:,2);
+                vv = a(:,1) + b(:,1) + mf;
+                ave = max(vv) - 50;
+                vv = vv - ave;
+                vv = exp(vv) .* ss;
+                v = sum(vv);
                 s = sign(v);
-                v = log(abs(v));
-%                 a = k.comps(1).taylor3(1:o , :)
-%                 b = flipud( k.comps(2).taylor3(1:o , :) )
-%                 mf = multFactor.firstList(o)
-%                 ss = a(:,2) .* b(:,2)
-%                 vv = a(:,1) + b(:,1) + mf
-%                 ave = mean(vv)
-%                 vv = vv - ave
-%                 vv = exp(vv) .* ss
-%                 v = sum(vv)
-%                 s = sign(v)
-%                 v = log(abs(v)) + ave
+                v = log(abs(v)) + ave;
             end
-            v = v + log(k.coefficient * multFactor.second( o, this.len-1 ));
+            v = v + log(abs(k.coefficient)) + log(multFactor.second( o, this.len-1 ));
+            if k.coefficient < 0
+                s = -s;
+            end
         end
         
         % calculate the value of taylor series at certain point

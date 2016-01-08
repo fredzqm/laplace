@@ -131,9 +131,7 @@ classdef simulator < handle
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-%             k
             v = newSegComp(1).taylor2(k+1);
-%             factorial(k)
         end
     end
     
