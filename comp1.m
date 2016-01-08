@@ -98,6 +98,11 @@ classdef comp1 < handle
             end
         end
         
+        function [v , s] = lastTermLog(this)
+            v = this.taylor2(this.len);
+            s = sign(v);
+            v = log(abs(v));
+        end
     end       
 end
 

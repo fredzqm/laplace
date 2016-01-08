@@ -70,5 +70,11 @@ classdef comp2 < handle
                 v = v * t / (i - derivOrder) + this.taylor2( i ) ;
             end
         end
+        
+        function [v , s] = lastTermLog(this)
+            v = this.taylor2(this.len);
+            s = sign(v);
+            v = log(abs(v));
+        end
     end       
 end

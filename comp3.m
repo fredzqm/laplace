@@ -101,5 +101,10 @@ classdef comp3 < handle
                 v = v * t / (i - derivOrder) + this.taylor2( i ) ;
             end
         end
+        
+        function [v , s] = lastTermLog(this)
+            v = this.taylor3(this.len , 1);
+            s = this.taylor3(this.len , 2);
+        end
     end       
 end

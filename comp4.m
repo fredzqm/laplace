@@ -88,5 +88,9 @@ classdef comp4 < handle
             end
         end
         
+        function [v , s] = lastTermLog(this)
+            v = this.taylor3(this.len , 1) + multFactor.logfactorial(this.len-1);
+            s = this.taylor3(this.len , 2);
+        end
     end       
 end

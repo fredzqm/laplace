@@ -128,29 +128,8 @@ classdef simulator < handle
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-% comp1 & comp2
-%                 v = newSegComp(1).taylor2(k+1);
-%                 s = sign(v);
-%                 v = log(abs(v));
-% comp3
-%                 v = newSegComp(1).taylor3(k+1 , 1);
-%                 s = newSegComp(1).taylor3(k+1 , 2);
-% comp4
-                v = newSegComp(1).taylor3(k+1 , 1) +  multFactor.logfactorial(k);
-                s = newSegComp(1).taylor3(k+1 , 2);
+            [v , s] = newSegComp(1).lastTermLog();
         end
-        
-        % create an array of comps and calculate the conrresponding
-        % derivative
-%         function v = derivAcc(this , t , k)
-%             newSegComp = this.f(1,:);
-%             for q = 1 : size( this.funct , 2 )
-%                 newSegComp(q) = getCompUnit( this.funct{q}(t) ) ;
-%             end
-%             addRelations(this.relation , newSegComp , t );
-%             repeatCompute(newSegComp, k);
-%             v = newSegComp(1).taylor2(k+1);
-%         end
     end
     
     

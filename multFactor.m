@@ -79,7 +79,9 @@ classdef multFactor
                 if ( k < 120 )
                     data(k) = log( factorial(k) );
                 else
-                    data(k) = multFactor.logfactorial(k-1) + log(k);
+                    for i = s(2)+1 : k
+                        data(i) = multFactor.logfactorial(i-1) + log(i);
+                    end
                 end
             end
             m = data(k);
