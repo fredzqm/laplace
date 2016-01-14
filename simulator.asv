@@ -170,9 +170,13 @@ function addRelations(relation, segComp , startTime)
             comps = [comps segComp(j)];
         end
         for order = 0 : k.order
-            segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
+            segComp(k.addTo).addR(k.coefficient*nchoosek(k.order, order)*startTime^order ...
                 , k.order - order ,  comps );
-        end
+        end 
+%         if k.order ~= 0
+%             segComp(k.addTo).addR(k.coefficient* startTime^k.order , 0 ,  comps );
+%         end
+%         segComp(k.addTo).addR( k.coefficient, k.order ,  comps );
     end
 end
 

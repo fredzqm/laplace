@@ -1,8 +1,8 @@
 % s/(s^2+1) -> cos(t)
 %% initialize
 clear;
-s = simulator( {@(s)s/(s*s+1) @(s)1/(s+1)} , 0, ...
-   [ rel(1, 1, 0, 2)   rel(1, -2, 2 ,[2 2]) ...
+s = simulator( {@(s)s/(s*s+1) @(s)1/(s*s+1)} , 0, ...
+   [ rel(1, 1, 0, 2)   rel(1, -2, 2,[2 2]) ...
      rel(2,-2, 1, [2 2]) ] );
 
 % %% compute
@@ -26,7 +26,7 @@ s = simulator( {@(s)s/(s*s+1) @(s)1/(s+1)} , 0, ...
 %% convergence
 figure(2)
 hold off
-t = 1;
-kk = 10 : 10: 500;
+t = 50;
+kk = 1 : 100 : 1000;
 answer = cos(t);
 vv = s.converge( t, kk , answer);
