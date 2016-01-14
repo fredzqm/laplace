@@ -1,5 +1,4 @@
 classdef rel
-    
     properties (SetAccess = public)
         addTo;
         coefficient;

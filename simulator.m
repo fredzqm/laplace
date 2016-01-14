@@ -1,10 +1,11 @@
 classdef simulator < handle
     
     properties (SetAccess = public)
-        relation; % calculate relationship between comps
         funct; % ideal function of each term 
-        f = getCompUnit(1); % comps used to calcuate taylor series
-        m ;
+        adderRel; % calculate multipler relationship
+        multRel; % calculate multipler relationship
+        adder = Adder(1); % comps used to calcuate taylor series
+        multiplier = Multiplier(1);
         t ; % start time of each segment
         seg; % the last segment
         minResetTime = 0.05; % default minResetTime
@@ -18,12 +19,12 @@ classdef simulator < handle
         function created = simulator(funct , initTime , relation)
             created.t = initTime;
             created.funct = funct;
-            created.relation = relation;
+            [created.adderRel, created.multRel] = rephraseRel(relation);
             for i = 1 : size(funct, 2)
-                created.f(i) = getCompUnit( funct{i}(initTime) );
+                created.f(i) = getAdder( funct{i}(initTime) );
             end
             created.seg = 1;
-            addRelations(relation , created.f, initTime);
+            addRelations(relation , created.adder, created.multiplier, initTime);
             repeatCompute(created.f, 10);
         end
         
@@ -125,7 +126,7 @@ classdef simulator < handle
         function [v , s] = derivAcclog(this , t , k)
             newSegComp = this.f(1,:);
             for q = 1 : size( this.funct , 2 )
-                newSegComp(q) = getCompUnit( this.funct{q}(t) ) ;
+                newSegComp(q) = getAdder( this.funct{q}(t) ) ;
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
@@ -152,7 +153,7 @@ classdef simulator < handle
             this.t = [this.t resetTime];
             newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
-                newSegComp(k) = getCompUnit( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
+                newSegComp(k) = getAdder( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
@@ -172,25 +173,8 @@ function repeatCompute(comps, order)
     end
 end
 
-
-% add certain relation to an array of comps, only when they are initialized
-% with relations, can they start computing
-% function addRelations(relation, segComp , startTime)
-%     for k = relation
-%         comps = [];
-%         for j = k.comps
-%             comps = [comps segComp(j)];
-%         end
-%         for order = 0 : k.order
-%             segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
-%                 , k.order - order ,  comps );
-%         end
-%     end
-% end
-
 % used for comp5
-function addRelations(relation, segComp , startTime)
-    multiplies  = {};
+function addRelations(adder, adderRel, multiplier, multRel, initTime)
     for k = relation
         comps = [];
         for j = k.comps
@@ -203,8 +187,6 @@ function addRelations(relation, segComp , startTime)
     end
 end
 
-% make comp more generic, so we can test the same case with different
-% versions of comps.
-function ret = getCompUnit(init)
-    ret = comp3(init);
+function rephraseRel(relation)
+    
 end
