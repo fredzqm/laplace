@@ -4,8 +4,7 @@ classdef simulator < handle
         funct; % ideal function of each term 
         adderRel; % calculate multipler relationship
         multRel; % calculate multipler relationship
-        adder = Adder(1); % comps used to calcuate taylor series
-        multiplier = Multiplier(1);
+        f ;
         t ; % start time of each segment
         seg; % the last segment
         minResetTime = 0.05; % default minResetTime
@@ -20,22 +19,19 @@ classdef simulator < handle
             created.t = initTime;
             created.funct = funct;
             [created.adderRel, created.multRel] = rephraseRel(relation);
-            for i = 1 : size(funct, 2)
-                created.f(i) = getAdder( funct{i}(initTime) );
-            end
             created.seg = 1;
-            addRelations(relation , created.adder, created.multiplier, initTime);
+            created.f = this.createUnit(initTime);
             repeatCompute(created.f, 10);
         end
         
         % compute a certain time given the minResetTime and minorder 
         function compute(this , time)
-            repeatCompute(this.f(this.seg, :) , this.minOrder);
+            repeatCompute(this.f(this.seg) , this.minOrder);
             u = time / this.minResetTime ;
             status = 0;
             for x = 1 : u
                 this.reset(this.minResetTime);
-                repeatCompute(this.f(this.seg, :) , this.minOrder);
+                repeatCompute(this.f(this.seg) , this.minOrder);
                 if x/u - status > 0.01
                     status = x/u;
                     fprintf('Computing ... %2d %%\n', uint8(status*100));
@@ -44,6 +40,30 @@ classdef simulator < handle
             fprintf('Finish computing\n');
         end
         
+        % reset the computation process at segDuration time after the last
+        % seg starts
+        function reset(this , segDuration)
+            resetTime = segDuration + this.t(this.seg);
+            this.t = [this.t resetTime];
+            newSegComp = this.f(1,:);
+            for k = 1 : size( this.f , 2 )
+                newSegComp(k) = getAdder( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
+            end
+            this.f = [this.f ; newSegComp];
+            this.seg = this.seg + 1;
+            start(this.relation , newSegComp, this.t(this.seg) );
+        end
+       
+        % used to find the threshold hold to turn into the next segment.
+        % used for func() and deriv()
+        function thresh = findThresh(this, seg)
+            if size(this.t , 2) < seg + 1
+                thresh = inf;
+            else
+                thresh = this.t(seg + 1);
+            end
+        end
+       
         % calculate the value of time array tt
         function vv = func(this , tt)
             vv = tt ;
@@ -54,7 +74,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).calc( tt(i) - this.t(segn) , 0);
+                vv(i) = this.f(segn).adder(1).calc( tt(i) - this.t(segn) , 0);
             end
         end
         
@@ -68,7 +88,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).calc( tt(i) - this.t(segn) , k );
+                vv(i) = this.f(segn).adder(1).calc( tt(i) - this.t(segn) , k );
                 continue;
             end
         end
@@ -105,8 +125,6 @@ classdef simulator < handle
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
-%               a is calculated use the following formula. They are constants
-%               a = log( (k)^(k+1) / factorial(k) )
                 a = multFactor.stir(k);
                 b = (k+1) * log(t); 
                 [c , s]= this.derivAcclog(kt , k);
@@ -124,69 +142,84 @@ classdef simulator < handle
         end
         
         function [v , s] = derivAcclog(this , t , k)
-            newSegComp = this.f(1,:);
-            for q = 1 : size( this.funct , 2 )
-                newSegComp(q) = getAdder( this.funct{q}(t) ) ;
-            end
-            addRelations(this.relation , newSegComp , t );
-            repeatCompute(newSegComp, k);
-            [v , s] = newSegComp(1).lastTermLog();
+            unit = this.createUnit(t);
+            repeatCompute(unit, k);
+            [v , s] = unit.adder(1).lastTermLog();
         end
+        
+        % used for comp5
+        function unit = createUnit(funct, adderRel, multRel, initTime)
+            for k = relation
+                comps = [];
+                for j = k.comps
+                    comps = [comps segComp(j)];
+                end
+                for order = 0 : k.order
+                    segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
+                        , k.order - order ,  comps );
+                end
+            end
+            unit.adder;
+            unit.multer;
+        end
+        
     end
     
-    
-    methods (Access = private)
-       % used to find the threshold hold to turn into the next segment.
-       % used for func() and deriv()
-       function thresh = findThresh(this, seg)
-            if size(this.t , 2) < seg + 1
-                thresh = inf;
-            else
-                thresh = this.t(seg + 1);
-            end
-       end
-       
-       % reset the computation process at segDuration time after the last
-       % seg starts
-       function reset(this , segDuration)
-            resetTime = segDuration + this.t(this.seg);
-            this.t = [this.t resetTime];
-            newSegComp = this.f(1,:);
-            for k = 1 : size( this.f , 2 )
-                newSegComp(k) = getAdder( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
-            end
-            this.f = [this.f ; newSegComp];
-            this.seg = this.seg + 1;
-            addRelations(this.relation , newSegComp, this.t(this.seg) );
-       end
-       
-    end
 end
 
 
 % repeat compute all comps order times.
-function repeatCompute(comps, order)
+function repeatCompute(unit, order)
     for k = 1 : order
-        for i = comps
+        for i = unit.multer
+            i.compute();
+        end
+        for i = unit.adder
             i.compute();
         end
     end
 end
 
-% used for comp5
-function addRelations(adder, adderRel, multiplier, multRel, initTime)
+function [adderRel, multRel] = rephraseRel(relation)
+    dim = 0;
     for k = relation
-        comps = [];
-        for j = k.comps
-            comps = [comps segComp(j)];
+        if k.addTo > dim
+            dim = k.addTo;
         end
-        for order = 0 : k.order
-            segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
-                , k.order - order ,  comps );
+        len = size(k.comps,2);
+        mults{len}{size(mults{len},2)+1} = sort(k.comps);
+    end
+    len = size(mults,2);
+    list = mults{2};
+    for j = 1 : size(list,2)
+        multRel(j).list = list{j};
+        multRel(j).x = list{j}(1);
+        multRel(j).y = list{j}(2);
+    end
+    count = size(list,2) + 1;
+    for i = 3 : len
+        list = mults{i};
+        for j = 1 : size(list,2)
+            a = findMatch(list{j}(; 
+            
         end
     end
 end
 
-function rephraseRel(relation)
-    
+
+function findMatch(a, multRel)
+    count = size(multRel, 2);
+    for k = count : 1
+        if all(ismember(multRel(k).list,a))
+            a = setdiff(a, multRel(k).list,a);
+            s = size(a,b);
+            if s == 0
+                break;
+            elseif s == 1
+
+            else
+
+            end
+        end
+    end
 end
