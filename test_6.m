@@ -27,6 +27,6 @@ s = simulator( {@(s)s/(s*s+1) @(s)1/(s*s+1)} , 0, ...
 figure(2)
 hold off
 t = 50;
-kk = 1 : 100 : 1000;
+kk = 1 : 250 : 20000;
 answer = cos(t);
 vv = s.converge( t, kk , answer);

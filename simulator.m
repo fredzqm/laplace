@@ -4,12 +4,13 @@ classdef simulator < handle
         relation; % calculate relationship between comps
         funct; % ideal function of each term 
         f = getCompUnit(1); % comps used to calcuate taylor series
+        m ;
         t ; % start time of each segment
         seg; % the last segment
         minResetTime = 0.05; % default minResetTime
         minOrder = 20; % default minOrder
     end
-    
+
     methods
         % take three terms -- funct (the function of comps)
         %                  -- initTime (the time to start compute)
@@ -161,9 +162,35 @@ classdef simulator < handle
     end
 end
 
+
+% repeat compute all comps order times.
+function repeatCompute(comps, order)
+    for k = 1 : order
+        for i = comps
+            i.compute();
+        end
+    end
+end
+
+
 % add certain relation to an array of comps, only when they are initialized
 % with relations, can they start computing
+% function addRelations(relation, segComp , startTime)
+%     for k = relation
+%         comps = [];
+%         for j = k.comps
+%             comps = [comps segComp(j)];
+%         end
+%         for order = 0 : k.order
+%             segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
+%                 , k.order - order ,  comps );
+%         end
+%     end
+% end
+
+% used for comp5
 function addRelations(relation, segComp , startTime)
+    multiplies  = {};
     for k = relation
         comps = [];
         for j = k.comps
@@ -176,18 +203,8 @@ function addRelations(relation, segComp , startTime)
     end
 end
 
-% repeat compute all comps order times.
-function repeatCompute(comps, order)
-    for k = 1 : order
-        for i = comps
-            i.compute();
-        end
-    end
-end
-
 % make comp more generic, so we can test the same case with different
 % versions of comps.
 function ret = getCompUnit(init)
     ret = comp3(init);
 end
-

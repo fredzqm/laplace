@@ -1,4 +1,4 @@
-classdef comp4 < handle
+classdef Multipler < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
@@ -13,7 +13,7 @@ classdef comp4 < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = comp4( init )
+        function newComp = Multipler( init )
             newComp.rel = [];
             newComp.taylor3(1,1) = log(abs(init));
             newComp.taylor3(1,2) = sign(init);

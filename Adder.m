@@ -1,4 +1,4 @@
-classdef comp3 < handle
+classdef Adder < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
@@ -13,7 +13,7 @@ classdef comp3 < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = comp3( init )
+        function newComp = Adder( init )
             newComp.rel = [];
             newComp.taylor3(1,1) = log(abs(init));
             newComp.taylor3(1,2) = sign(init);
@@ -21,10 +21,6 @@ classdef comp3 < handle
         
         function v = get.len(this)
             v = size(this.taylor3 , 1) ;
-        end
-        
-        function coe = taylor2(this, order)
-            coe = exp(this.taylor3(order , 1)) * this.taylor3(order , 2);
         end
         
         % append another term of taylor's series
@@ -56,10 +52,10 @@ classdef comp3 < handle
                 next(:,1) = next(:,1) - ave;
                 next(:,1) = exp(next(:,1)) .* next(:,2);
                 value = sum(next(:,1));
-                this.add(log(abs(value)) + ave , sign(value) );
+                this.add(log(abs(value)) + ave - log(this.len) , sign(value) );
             else
                 [v, s] = this.computeItem( this.rel(1) );
-                this.add( v , s );
+                this.add( v - log(this.len) , s );
             end
         end
         
@@ -77,9 +73,8 @@ classdef comp3 < handle
             else
                 a = k.comps(1).taylor3(1:o , :);
                 b = flipud( k.comps(2).taylor3(1:o , :) );
-                mf = multFactor.firstList(o);
                 ss = a(:,2) .* b(:,2);
-                vv = a(:,1) + b(:,1) + mf;
+                vv = a(:,1) + b(:,1);
                 ave = max(vv) - 50;
                 vv = vv - ave;
                 vv = exp(vv) .* ss;
@@ -87,23 +82,14 @@ classdef comp3 < handle
                 s = sign(v);
                 v = log(abs(v)) + ave;
             end
-            v = v + log(abs(k.coefficient)) + log(multFactor.second( o, this.len-1 ));
+            v = v + log(abs(k.coefficient));
             if k.coefficient < 0
                 s = -s;
             end
         end
         
-        % calculate the value of taylor series at certain point
-        % using taylor2
-        function v = calc(this, t , derivOrder)
-            v = this.taylor2(this.len) ;
-            for  i = this.len - 1 : -1 : derivOrder + 1
-                v = v * t / (i - derivOrder) + this.taylor2( i ) ;
-            end
-        end
-        
         function [v , s] = lastTermLog(this)
-            v = this.taylor3(this.len , 1);
+            v = this.taylor3(this.len , 1) + multFactor.logfactorial(this.len-1);
             s = this.taylor3(this.len , 2);
         end
     end       
