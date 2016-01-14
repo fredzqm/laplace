@@ -3,7 +3,7 @@ classdef simulator < handle
     properties (SetAccess = public)
         relation; % calculate relationship between comps
         funct; % ideal function of each term 
-        f = comp(1); % comps used to calcuate taylor series
+        f = getCompUnit(1); % comps used to calcuate taylor series
         t ; % start time of each segment
         seg; % the last segment
         minResetTime = 0.05; % default minResetTime
@@ -19,7 +19,7 @@ classdef simulator < handle
             created.funct = funct;
             created.relation = relation;
             for i = 1 : size(funct, 2)
-                created.f(i) = comp( funct{i}(initTime) );
+                created.f(i) = getCompUnit( funct{i}(initTime) );
             end
             created.seg = 1;
             addRelations(relation , created.f, initTime);
@@ -28,17 +28,18 @@ classdef simulator < handle
         
         % compute a certain time given the minResetTime and minorder 
         function compute(this , time)
-            u = time / this.minResetTime ;
             repeatCompute(this.f(this.seg, :) , this.minOrder);
+            u = time / this.minResetTime ;
             status = 0;
             for x = 1 : u
                 this.reset(this.minResetTime);
                 repeatCompute(this.f(this.seg, :) , this.minOrder);
                 if x/u - status > 0.01
-                    status = 0.01 + status;
-                    fprintf('Computing ... %2d %%\n',uint8(status*100) );
+                    status = x/u;
+                    fprintf('Computing ... %2d %%\n', uint8(status*100));
                 end
             end
+            fprintf('Finish computing\n');
         end
         
         % calculate the value of time array tt
@@ -51,7 +52,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).func(tt(i) - this.t(segn));
+                vv(i) = this.f(segn , 1).calc( tt(i) - this.t(segn) , 0);
             end
         end
         
@@ -65,7 +66,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn , 1).deriv( tt(i) - this.t(segn) , k );
+                vv(i) = this.f(segn , 1).calc( tt(i) - this.t(segn) , k );
                 continue;
             end
         end
@@ -86,7 +87,7 @@ classdef simulator < handle
             hold on
             plot( tt , this.deriv(tt , order) , 'y');  
         end
-        
+
         % plot the curve to show convergence. will be used to find inverse laplace
         % It does not necessary needed to be called after the simulator has compute
         % in this range.
@@ -97,33 +98,37 @@ classdef simulator < handle
             vv = kk;
             aa = kk;
             aa(:) = answer;
+            stepSize = 60;
+            next = 0;
             for i = 1 : size(kk,2)
                 k = kk(i);
                 kt = k / t;
-%                 v = (-1)^k  * (kt)^(k+1) /  factorial(k);
-            % two lines below are essentially the same when k is big, using
-            % stiring approximation
-%               v = (-1)^k / factorial(k) * (k/exp(1))^(k+1);
-                v = (-1)^k / sqrt(2*pi*k) * (k/exp(1)); %
-                v = v * (exp(1)/t)^(k+1);
-%               v = (-1)^k * (kt)^(k+1);
-%               x = this.deriv(kt , k)  
-                x = this.derivAcc(kt , k);
-                vv(i) = v * x;
+%               a is calculated use the following formula. They are constants
+%               a = log( (k)^(k+1) / factorial(k) )
+                a = multFactor.stir(k);
+                b = (k+1) * log(t); 
+                [c , s]= this.derivAcclog(kt , k);
+                vv(i) = exp( a - b + c );
+                if (s > 0) == mod(k,2) 
+                    vv(i) = - vv(i);
+                end
+                if k >=  next
+                    next = (floor(kk(i)/stepSize)+1) * stepSize;
+                    fprintf('Computing converge ... k = %2d \n', k);
+                end
             end
+            fprintf('Finish computing converge\n');
             plot(kk , vv ,'-', kk , aa , '.');
         end
         
-        % create an array of comps and calculate the conrresponding
-        % derivative
-        function v = derivAcc(this , t , k)
+        function [v , s] = derivAcclog(this , t , k)
             newSegComp = this.f(1,:);
             for q = 1 : size( this.funct , 2 )
-                newSegComp(q) = comp( this.funct{q}(t) ) ;
+                newSegComp(q) = getCompUnit( this.funct{q}(t) ) ;
             end
             addRelations(this.relation , newSegComp , t );
             repeatCompute(newSegComp, k);
-            v = newSegComp(1).taylor2(k+1);
+            [v , s] = newSegComp(1).lastTermLog();
         end
     end
     
@@ -146,7 +151,7 @@ classdef simulator < handle
             this.t = [this.t resetTime];
             newSegComp = this.f(1,:);
             for k = 1 : size( this.f , 2 )
-                newSegComp(k) = comp( this.f(this.seg,k).func( resetTime - this.t(this.seg) ) ) ;
+                newSegComp(k) = getCompUnit( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
@@ -164,10 +169,10 @@ function addRelations(relation, segComp , startTime)
         for j = k.comps
             comps = [comps segComp(j)];
         end
-        if k.order ~= 0
-            segComp(k.addTo).addR(k.coefficient* startTime^k.order , 0 ,  comps );
+        for order = 0 : k.order
+            segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
+                , k.order - order ,  comps );
         end
-        segComp(k.addTo).addR( k.coefficient, k.order ,  comps );
     end
 end
 
@@ -179,3 +184,10 @@ function repeatCompute(comps, order)
         end
     end
 end
+
+% make comp more generic, so we can test the same case with different
+% versions of comps.
+function ret = getCompUnit(init)
+    ret = comp3(init);
+end
+

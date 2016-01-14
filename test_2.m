@@ -8,7 +8,7 @@ s = simulator({@(t)sin(t*t) @(t)cos(t*t)} , 0 , ...
 %% compute
 s.minOrder = 100;
 s.minResetTime = 1/2;
-s.compute(9);
+s.compute(10);
 
 %% display
 figure(1)

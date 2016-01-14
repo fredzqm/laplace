@@ -1,4 +1,4 @@
-classdef comp < handle
+classdef comp1 < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
@@ -13,7 +13,7 @@ classdef comp < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = comp( init )
+        function newComp = comp1( init )
             newComp.rel = [];
             newComp.taylor = init;
             newComp.taylor2 = init;
@@ -88,6 +88,20 @@ classdef comp < handle
             for  i = this.len - 1 : -1 : k + 1
                 v = v * t / (i - k) + this.taylor2( i ) ;
             end
+        end
+        
+        function v = calc(this, t , k )
+            if k == 0
+                v = this.func(t);
+            else
+                v = this.deriv(t, k);
+            end
+        end
+        
+        function [v , s] = lastTermLog(this)
+            v = this.taylor2(this.len);
+            s = sign(v);
+            v = log(abs(v));
         end
     end       
 end
