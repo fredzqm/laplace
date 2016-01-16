@@ -59,6 +59,7 @@ function [adderRel, multRel] = rephraseRel(relation)
             pq.add(list(3:end), size(list,2) - 2);
         end
     end
+    
     for rel = relation
         added.coefficient = rel.coefficient ;
         added.order = rel.order ;
@@ -86,11 +87,54 @@ function [adderRel, multRel] = rephraseRel(relation)
             end
             adderRel(rel.addTo).list(len+1) = added;
         else
-            adderRel(rel.addTo).list.coefficient = added.coefficient;
-            adderRel(rel.addTo).list.order = added.order;
-            adderRel(rel.addTo).list.multer = added.multer;
+            adderRel(rel.addTo).list(1).coefficient = added.coefficient;
+            adderRel(rel.addTo).list(1).order = added.order;
+            adderRel(rel.addTo).list(1).multer = added.multer;
         end
     end
+    
+    displayConvertedRel(adderRel, multRel);
+end
 
+    
+function [ret, diffList] = includedIn(a, b)
+    if ~all(ismember(a, b))
+        ret = 0;
+        return;
+    end
+    ret = 1;
+    diffList = setdiff(b,a);
+    if size(diffList,1) == 0 % two set equal, no need to worry
+        error('identical comps');
+    end
+end
+
+
+function displayConvertedRel(adderRel, multRel)
+    for i = 1 : size(adderRel, 2)
+        adder = '';
+        for j = 1 : size(adderRel(i).list, 2)
+            added = sprintf('  %d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
+                adderRel(i).list(j).order, str(adderRel(i).list(j).multer) );
+            if j ~= 1
+                added = strcat( added, '+');
+            end
+            adder = strcat(adder, added);
+        end
+        display(sprintf('Adder %d =%s', i , adder ) );
+    end
+    for i = 1 : size(multRel, 2)
+        display(sprintf('Multer %d = %s * %s', i, str(multRel.a), str(multRel.b)));
+    end
+end
+
+
+function s = str(a)
+    if a.t == 0
+        s = sprintf('Adder %d', a.i);
+    else
+        s = sprintf('Multer %d', a.i);
+    end
+end
 
 
