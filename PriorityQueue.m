@@ -68,6 +68,16 @@ classdef PriorityQueue < handle
 
         end
 
+        function [contain] = contains( obj, value )    
+            contain = 0;
+            for i = 1 : size(obj.valueList,1)
+                if compareElement( obj.valueList{i} , value ) == 0
+                    contain = 1;
+                    return;
+                end
+            end
+        end
+        
         function [qSize] = size( obj )
 
             qSize = obj.numElements;
@@ -124,7 +134,10 @@ classdef PriorityQueue < handle
         function [blnCmpResult] = compare(obj, e1, e2)
             blnCmpResult = (obj.priorityList{e1} > obj.priorityList{e2});
             if obj.priorityList{e1} == obj.priorityList{e2}
-                blnCmpResult = compareElement(obj.valueList{e1} ,  obj.valueList{e2});
+                compareResult = compareElement(obj.valueList{e1} ,  obj.valueList{e2});
+                if compareResult > 0
+                    blnCmpResult = 1;
+                end
             end
         end
 
@@ -146,7 +159,8 @@ end
 
 
 function ret = compareElement(a , b)
-    for i = 1 : size(a,2)
+    ret = size(a, 2) - size(b, 2);
+    for i = 1 : min(size(a, 2), size(b, 2))
         if a(i) < b(i)
             ret = 0;
             return;
