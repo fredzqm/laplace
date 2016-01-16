@@ -180,46 +180,52 @@ function repeatCompute(unit, order)
     end
 end
 
-function [adderRel, multRel] = rephraseRel(relation)
+function [adderRel, mults] = rephraseRel(relation)
     dim = 0;
-    for k = relation
-        if k.addTo > dim
-            dim = k.addTo;
+    for rel = relation
+        if rel.addTo > dim
+            dim = rel.addTo;
         end
-        len = size(k.comps,2);
-        mults{len}{size(mults{len},2)+1} = sort(k.comps);
+        len = size(rel.comps,2);
+        addedList = sort(rel.comps);
+        if ~ismember(addedList, mults(len).need)
+            s = size(mults{len}.need, 2);
+            mults(len).need(s+1).list = addedList;
+        end
     end
-    len = size(mults,2);
-    list = mults{2};
-    for j = 1 : size(list,2)
-        multRel(j).list = list{j};
-        multRel(j).x = list{j}(1);
-        multRel(j).y = list{j}(2);
-    end
-    count = size(list,2) + 1;
-    for i = 3 : len
-        list = mults{i};
-        for j = 1 : size(list,2)
-            a = findMatch(list{j}(; 
-            
+    for len = 3 : size(mults,2)
+        need = mults(len).need;
+        for j = 1 : size(need,2)
+            list = need(j).list;
+            for schlen = len-1 : 2 % len to search for
+                cts = mults(schlen);
+                for k = 1 : size( cts.need, 2)
+                    [flag, diffList] = includedIn(cts.need(k).list, list);
+                    if flag
+                        if size(diffList,2) == 1
+                             
+                        end
+                    end
+                end
+                if isfield(cts, 'used')
+                    for k = 1 : size( cts.used, 2)
+                        cts.used(k).list
+                    end
+                end     
+            end
         end
     end
 end
 
 
-function findMatch(a, multRel)
-    count = size(multRel, 2);
-    for k = count : 1
-        if all(ismember(multRel(k).list,a))
-            a = setdiff(a, multRel(k).list,a);
-            s = size(a,b);
-            if s == 0
-                break;
-            elseif s == 1
-
-            else
-
-            end
-        end
+function [ret, diffList] = includedIn(a, b)
+    if ~all(ismember(a, b))
+        ret = 0;
+        return;
+    end
+    ret = 1;
+    diffList = setdiff(b,a);
+    if size(diffList,1) == 0 % two set equal, no need to worry
+        error('identical comps');
     end
 end
