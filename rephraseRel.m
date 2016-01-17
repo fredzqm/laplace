@@ -144,6 +144,7 @@ function displayConvertedRel(adderRel, multRel)
         display(sprintf('Multer%d''\t= %s * %s \t\t\t (%s )', ...
             i, str(multRel(i).a), str(multRel(i).b), list));
     end
+    display(' ');
 end
 
 
