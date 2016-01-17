@@ -148,7 +148,25 @@ classdef simulator < handle
         end
         
         % used for comp5
-        function unit = createUnit(funct, adderRel, multRel, initTime)
+        function unit = createUnit(initTime)
+            unit.adder;
+            unit.multer;
+                for i = 1 : size(adderRel, 2)
+                    adder = '';
+                    for j = 1 : size(adderRel(i).list, 2)
+                        added = sprintf('  %d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
+                            adderRel(i).list(j).order, str(adderRel(i).list(j).multer) );
+                        if j ~= 1
+                            added = strcat( added, '+');
+                        end
+                        adder = strcat(adder, added);
+                    end
+                    display(sprintf('Adder %d =%s', i , adder ) );
+                end
+                for i = 1 : size(multRel, 2)
+                    display(sprintf('Multer %d = %s * %s', i, str(multRel.a), str(multRel.b)));
+                end
+                
             for k = relation
                 comps = [];
                 for j = k.comps
@@ -159,8 +177,9 @@ classdef simulator < handle
                         , k.order - order ,  comps );
                 end
             end
-            unit.adder;
-            unit.multer;
+            
+                
+            
         end
         
     end

@@ -1,4 +1,4 @@
-classdef Adder < handle
+ classdef Adder < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
@@ -6,7 +6,7 @@ classdef Adder < handle
         taylor3 ; % taylor series, log(|coe|), coe*k^n/n!,
         % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
     end
-    
+     
     properties (Dependent)
         len ; % quick way to find the length of current taylor's series
     end
@@ -68,19 +68,8 @@ classdef Adder < handle
                 return;
             end
             if size( k.comps , 2 ) == 1
-                v = k.comps(1).taylor3(o , 1);
-                s = k.comps(1).taylor3(o , 2);
-            else
-                a = k.comps(1).taylor3(1:o , :);
-                b = flipud( k.comps(2).taylor3(1:o , :) );
-                ss = a(:,2) .* b(:,2);
-                vv = a(:,1) + b(:,1);
-                ave = max(vv) - 50;
-                vv = vv - ave;
-                vv = exp(vv) .* ss;
-                v = sum(vv);
-                s = sign(v);
-                v = log(abs(v)) + ave;
+                v = k.comps.taylor3(o , 1);
+                s = k.comps.taylor3(o , 2);
             end
             v = v + log(abs(k.coefficient));
             if k.coefficient < 0

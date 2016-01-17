@@ -2,7 +2,8 @@ classdef Multipler < handle
     %ELE Summary of this class goes here
     %   Detailed explanation goes here
     properties
-        rel ; % relationship to other component
+        a ;
+        b ; % two computational unit to be multiplied
         taylor3 ; % taylor series, log(|coe|), coe*k^n/n!,
         % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
     end
@@ -13,10 +14,11 @@ classdef Multipler < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = Multipler( init )
-            newComp.rel = [];
+        function newComp = Multipler( init , a, b)
             newComp.taylor3(1,1) = log(abs(init));
             newComp.taylor3(1,2) = sign(init);
+            newComp.a = a;
+            newComp.b = b;
         end
         
         function v = get.len(this)
@@ -29,64 +31,23 @@ classdef Multipler < handle
             this.taylor3(l , 1) = v;
             this.taylor3(l , 2) = s;
         end
-        
-        % call comp.addR( coefficient , order , list of comps multiplied ] );
-        % add a relationship term
-        function [this] = addR(this , coefficient , order , comps )
-            newAdd.coefficient = coefficient ;
-            newAdd.order = order ;
-            newAdd.comps = comps ;
-            this.rel = [this.rel newAdd]; 
-        end
-        
+                
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
-            if size(this.rel, 2) > 1
-                next = zeros( size(this.rel, 2), 2);
-                for i = 1 : size(this.rel, 2)
-                    [v, s] = this.computeItem( this.rel(i) );
-                    next(i, 1) = v;
-                    next(i, 2) = s;
-                end
-                ave = max(next(:,1));
-                next(:,1) = next(:,1) - ave;
-                next(:,1) = exp(next(:,1)) .* next(:,2);
-                value = sum(next(:,1));
-                this.add(log(abs(value)) + ave - log(this.len) , sign(value) );
-            else
-                [v, s] = this.computeItem( this.rel(1) );
-                this.add( v - log(this.len) , s );
-            end
+            o = this.len;
+            a = this.a.taylor3(1:o , :);
+            b = flipud( this.b.taylor3(1:o , :) );
+            ss = a(:,2) .* b(:,2);
+            vv = a(:,1) + b(:,1);
+            ave = max(vv) - 50;
+            vv = vv - ave;
+            vv = exp(vv) .* ss;
+            v = sum(vv);
+            s = sign(v);
+            v = log(abs(v)) + ave ;
+            this.add( v - log(this.len) , s );
         end
         
-        % compute the result of one relation
-        function [v, s] = computeItem( this ,  k )
-            o = this.len - k.order;
-            if o < 1
-                v = 0;
-                s = 0;
-                return;
-            end
-            if size( k.comps , 2 ) == 1
-                v = k.comps(1).taylor3(o , 1);
-                s = k.comps(1).taylor3(o , 2);
-            else
-                a = k.comps(1).taylor3(1:o , :);
-                b = flipud( k.comps(2).taylor3(1:o , :) );
-                ss = a(:,2) .* b(:,2);
-                vv = a(:,1) + b(:,1);
-                ave = max(vv) - 50;
-                vv = vv - ave;
-                vv = exp(vv) .* ss;
-                v = sum(vv);
-                s = sign(v);
-                v = log(abs(v)) + ave;
-            end
-            v = v + log(abs(k.coefficient));
-            if k.coefficient < 0
-                s = -s;
-            end
-        end
         
         function [v , s] = lastTermLog(this)
             v = this.taylor3(this.len , 1) + multFactor.logfactorial(this.len-1);
