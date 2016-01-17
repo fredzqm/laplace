@@ -1,8 +1,10 @@
 function [adderRel, multRel] = rephraseRel(relation)
+    displayRelation(relation); % display relationship inputed
+    
     pq = PriorityQueue();
     for rel = relation
         addedList = sort(rel.comps);
-        if ~ pq.contains(addedList)
+        if ~pq.contains(addedList)
             pq.insert( addedList , size(addedList,2) );
         end
     end
@@ -21,7 +23,7 @@ function [adderRel, multRel] = rephraseRel(relation)
             multRel(index).b.i = list(2);
             continue;
         end
-        for i = size(multRel, 2) : 1
+        for i = size(multRel, 2): -1 : 1
             [flag, diffList] = includedIn(multRel(i).list, list);
             if flag
                 if size(diffList, 2) == 1
@@ -34,7 +36,7 @@ function [adderRel, multRel] = rephraseRel(relation)
                     break;
                 end
                 found = 0;
-                for j = size(multRel, 2) : 1
+                for j = size(multRel, 2): -1 : 1
                     if compareElement(multRel(j).list, diffList) == 0
                         index = index + 1;
                         multRel(index).list = list;
@@ -47,16 +49,16 @@ function [adderRel, multRel] = rephraseRel(relation)
                     end
                 end
                 if found == 0
-                    pq.add(list, size(list, 2));
-                    pq.add(diffList, size(diffList, 2));
+                    pq.insert(list, size(list, 2));
+                    pq.insert(diffList, size(diffList, 2));
                 end
                 break;
             end
         end
         if flag == 0
-            pq.add(list, size(list, 2));
-            pq.add(list(1:2), 2);
-            pq.add(list(3:end), size(list,2) - 2);
+            pq.insert(list, size(list, 2));
+            pq.insert(list(1:2), 2);
+            pq.insert(list(3:end), size(list,2) - 2);
         end
     end
     
@@ -93,17 +95,27 @@ function [adderRel, multRel] = rephraseRel(relation)
         end
     end
     
-    displayConvertedRel(adderRel, multRel);
+    displayConvertedRel(adderRel, multRel); % display processed relationship
 end
 
     
 function [ret, diffList] = includedIn(a, b)
-    if ~all(ismember(a, b))
-        ret = 0;
-        return;
+    ret = 0;
+    diffList = b;
+    for x = a
+        found = 0;
+        for i = 1 : size(diffList,2)
+            if diffList(i) == x
+                diffList(i) = [];
+                found = 1;
+                break;
+            end
+        end
+        if found == 0
+            return;
+        end
     end
     ret = 1;
-    diffList = setdiff(b,a);
     if size(diffList,1) == 0 % two set equal, no need to worry
         error('identical comps');
     end
@@ -111,30 +123,53 @@ end
 
 
 function displayConvertedRel(adderRel, multRel)
+    display('Output computational model meaning');
     for i = 1 : size(adderRel, 2)
         adder = '';
         for j = 1 : size(adderRel(i).list, 2)
-            added = sprintf('  %d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
+            added = sprintf(' %2d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
                 adderRel(i).list(j).order, str(adderRel(i).list(j).multer) );
             if j ~= 1
-                adder = strcat(adder, '  +');
+                adder = strcat(adder, '  +  ');
             end
             adder = strcat(adder, added);
         end
-        display(sprintf('Adder%d =%s', i , adder ) );
+        display(sprintf('Adder %d''\t=%s', i , adder ) );
     end
     for i = 1 : size(multRel, 2)
-        display(sprintf('Multer%d = %s * %s', i, str(multRel.a), str(multRel.b)));
+        list = '';
+        for k = multRel(i).list
+            list = strcat(list, sprintf(' %d',k));
+        end
+        display(sprintf('Multer%d''\t= %s * %s \t\t\t (%s )', ...
+            i, str(multRel(i).a), str(multRel(i).b), list));
     end
 end
 
 
 function s = str(a)
     if a.t == 0
-        s = sprintf('Adder%d', a.i);
+        s = sprintf('Adder %d', a.i);
     else
         s = sprintf('Multer%d', a.i);
     end
+end
+
+
+function displayRelation(relation)
+    display('Input relation meaning');
+    for k = relation
+        compstr = '';
+        for i = 1 : size(k.comps,2)
+            if i ~= 1
+                compstr = strcat(compstr, ' * ');
+            end
+            compstr = strcat(compstr, sprintf('Comp%d', k.comps(i)) );
+        end
+        display(sprintf('Comp%d += %2d * t^%d * %s', k.addTo, ...
+                k.coefficient, k.order, compstr));
+    end
+    display(' ');
 end
 
 
