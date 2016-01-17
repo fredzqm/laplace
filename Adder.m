@@ -15,8 +15,10 @@
         % init is the initial value of comp unit
         function newComp = Adder( init )
             newComp.rel = [];
-            newComp.taylor3(1,1) = log(abs(init));
             newComp.taylor3(1,2) = sign(init);
+            if sign(init)
+                newComp.taylor3(1,1) = log(abs(init));
+            end
         end
         
         function v = get.len(this)
@@ -25,18 +27,24 @@
         
         % append another term of taylor's series
         function [this] = add( this, v , s )
-            l = this.len + 1;
-            this.taylor3(l , 1) = v;
-            this.taylor3(l , 2) = s;
+            len = this.len + 1;
+            if s == 0
+                this.taylor3(len , 1) = 0;
+            else
+                this.taylor3(len , 1) = v - log(this.len);
+            end
+            this.taylor3(len , 2) = s;
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
         % add a relationship term
         function [this] = addR(this , coefficient , order , comps )
-            newAdd.coefficient = coefficient ;
-            newAdd.order = order ;
-            newAdd.comps = comps ;
-            this.rel = [this.rel newAdd]; 
+            if coefficient ~= 0
+                newAdd.coefficient = coefficient ;
+                newAdd.order = order ;
+                newAdd.comps = comps ;
+                this.rel = [this.rel newAdd];
+            end
         end
         
         % compute all relatioins for this term and sum them up
@@ -52,10 +60,10 @@
                 next(:,1) = next(:,1) - ave;
                 next(:,1) = exp(next(:,1)) .* next(:,2);
                 value = sum(next(:,1));
-                this.add(log(abs(value)) + ave - log(this.len) , sign(value) );
+                this.add(log(abs(value)) + ave , sign(value) );
             else
                 [v, s] = this.computeItem( this.rel(1) );
-                this.add( v - log(this.len) , s );
+                this.add( v , s );
             end
         end
         

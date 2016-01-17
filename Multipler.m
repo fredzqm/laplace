@@ -27,13 +27,17 @@ classdef Multipler < handle
         % append another term of taylor's series
         function [this] = add( this, v , s )
             len = this.len + 1;
-            this.taylor3(len , 1) = v;
+            if s == 0
+                this.taylor3(len , 1) = 0;
+            else
+                this.taylor3(len , 1) = v;
+            end
             this.taylor3(len , 2) = s;
         end
                 
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
-            o = this.len+1;
+            o = this.len + 1;
             a = this.a.taylor3(1:o , :);
             b = flipud( this.b.taylor3(1:o , :) );
             ss = a(:,2) .* b(:,2);
@@ -43,8 +47,8 @@ classdef Multipler < handle
             vv = exp(vv) .* ss;
             v = sum(vv);
             s = sign(v);
-            v = log(abs(v)) + ave ;
-            this.add( v - log(this.len) , s );
+            v = log(abs(v)) + ave;
+            this.add( v , s );
         end
         
         

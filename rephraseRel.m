@@ -117,23 +117,23 @@ function displayConvertedRel(adderRel, multRel)
             added = sprintf('  %d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
                 adderRel(i).list(j).order, str(adderRel(i).list(j).multer) );
             if j ~= 1
-                added = strcat( added, '+');
+                adder = strcat(adder, '  +');
             end
             adder = strcat(adder, added);
         end
-        display(sprintf('Adder %d =%s', i , adder ) );
+        display(sprintf('Adder%d =%s', i , adder ) );
     end
     for i = 1 : size(multRel, 2)
-        display(sprintf('Multer %d = %s * %s', i, str(multRel.a), str(multRel.b)));
+        display(sprintf('Multer%d = %s * %s', i, str(multRel.a), str(multRel.b)));
     end
 end
 
 
 function s = str(a)
     if a.t == 0
-        s = sprintf('Adder %d', a.i);
+        s = sprintf('Adder%d', a.i);
     else
-        s = sprintf('Multer %d', a.i);
+        s = sprintf('Multer%d', a.i);
     end
 end
 
