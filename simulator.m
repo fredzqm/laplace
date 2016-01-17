@@ -20,7 +20,7 @@ classdef simulator < handle
             created.funct = funct;
             [created.adderRel, created.multRel] = rephraseRel(relation);
             created.seg = 1;
-            created.f = this.createUnit(initTime);
+            created.f = created.createUnit(initTime);
             repeatCompute(created.f, 10);
         end
         
@@ -126,8 +126,8 @@ classdef simulator < handle
                 k = kk(i);
                 kt = k / t;
                 a = multFactor.stir(k);
-                b = (k+1) * log(t); 
-                [c , s]= this.derivAcclog(kt , k);
+                b = (k+1) * log(t);
+                [c , s] = this.derivAcclog(kt , k);
                 vv(i) = exp( a - b + c );
                 if (s > 0) == mod(k,2) 
                     vv(i) = - vv(i);
@@ -148,38 +148,38 @@ classdef simulator < handle
         end
         
         % used for comp5
-        function unit = createUnit(initTime)
-            unit.adder;
-            unit.multer;
-                for i = 1 : size(adderRel, 2)
-                    adder = '';
-                    for j = 1 : size(adderRel(i).list, 2)
-                        added = sprintf('  %d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
-                            adderRel(i).list(j).order, str(adderRel(i).list(j).multer) );
-                        if j ~= 1
-                            added = strcat( added, '+');
-                        end
-                        adder = strcat(adder, added);
-                    end
-                    display(sprintf('Adder %d =%s', i , adder ) );
+        function unit = createUnit(this, initTime)
+            for i = 1 : size(this.funct, 2)
+                unit.adder(i) = Adder( this.funct{i}(initTime) );
+            end
+            for i = 1 : size(this.multRel, 2)
+                mult = this.multRel(i);
+                if mult.a.t
+                    a = unit.multer(mult.a.i);
+                else
+                    a = unit.adder(mult.a.i);
                 end
-                for i = 1 : size(multRel, 2)
-                    display(sprintf('Multer %d = %s * %s', i, str(multRel.a), str(multRel.b)));
+                if mult.b.t
+                    b = unit.multer(mult.b.i);
+                else
+                    b = unit.adder(mult.b.i);
                 end
-                
-            for k = relation
-                comps = [];
-                for j = k.comps
-                    comps = [comps segComp(j)];
-                end
-                for order = 0 : k.order
-                    segComp(k.addTo).addR(k.coefficient*nchoosek(k.order,order)*startTime^order ...
-                        , k.order - order ,  comps );
-                end
+                unit.multer(i) = Multipler(a, b);
             end
             
-                
-            
+            for i = 1 : size(this.adderRel, 2)
+                for k = this.adderRel(i).list
+                    if k.multer.t
+                        comps = unit.multer(k.multer.i);
+                    else
+                        comps = unit.adder(k.multer.i);
+                    end
+                    for order = 0 : k.order
+                        unit.adder(i).addR(k.coefficient*nchoosek(k.order,order)...
+                            *initTime^order , k.order - order ,  comps );
+                    end
+                end
+            end
         end
         
     end

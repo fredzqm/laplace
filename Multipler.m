@@ -14,11 +14,10 @@ classdef Multipler < handle
     
     methods
         % init is the initial value of comp unit
-        function newComp = Multipler( init , a, b)
-            newComp.taylor3(1,1) = log(abs(init));
-            newComp.taylor3(1,2) = sign(init);
+        function newComp = Multipler(a, b)
             newComp.a = a;
             newComp.b = b;
+            newComp.taylor3 = [];
         end
         
         function v = get.len(this)
@@ -27,14 +26,14 @@ classdef Multipler < handle
         
         % append another term of taylor's series
         function [this] = add( this, v , s )
-            l = this.len + 1;
-            this.taylor3(l , 1) = v;
-            this.taylor3(l , 2) = s;
+            len = this.len + 1;
+            this.taylor3(len , 1) = v;
+            this.taylor3(len , 2) = s;
         end
                 
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
-            o = this.len;
+            o = this.len+1;
             a = this.a.taylor3(1:o , :);
             b = flipud( this.b.taylor3(1:o , :) );
             ss = a(:,2) .* b(:,2);
