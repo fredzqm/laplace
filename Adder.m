@@ -4,11 +4,7 @@
     properties
         rel ; % relationship to other component
         taylor3 ; % taylor series, log(|coe|), coe*k^n/n!,
-        % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
-    end
-     
-    properties (Dependent)
-        len ; % quick way to find the length of current taylor's series
+        len ; % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
     end
     
     methods
@@ -19,21 +15,18 @@
             if sign(init)
                 newComp.taylor3(1,1) = log(abs(init));
             end
-        end
-        
-        function v = get.len(this)
-            v = size(this.taylor3 , 1) ;
+            newComp.len = 1;
         end
         
         % append another term of taylor's series
         function [this] = add( this, v , s )
-            len = this.len + 1;
+            this.len = this.len + 1;
             if s == 0
-                this.taylor3(len , 1) = 0;
+                this.taylor3(this.len , 1) = 0;
             else
-                this.taylor3(len , 1) = v - log(this.len);
+                this.taylor3(this.len , 1) = v - log(this.len);
             end
-            this.taylor3(len , 2) = s;
+            this.taylor3(this.len , 2) = s;
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );

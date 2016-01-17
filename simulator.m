@@ -196,8 +196,6 @@ function repeatCompute(unit, order)
         for i = unit.adder
             i.compute();
         end
-%         x = unit.adder.taylor3
-%         y = unit.multer.taylor3
     end
     
 end
