@@ -10,6 +10,6 @@ s = simulator( {@(s)2*(3*s^2-1)/(3*s^2+1)^3 ...
 figure(1)
 hold off
 t = 10;
-kk = 1 : 10 : 1000;
+kk = 1 : 100 : 1000;
 answer = t^2 * sin(t);
 vv = s.converge( t, kk , answer);

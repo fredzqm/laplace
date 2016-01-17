@@ -24,7 +24,7 @@
             if s == 0
                 this.taylor3(this.len , 1) = 0;
             else
-                this.taylor3(this.len , 1) = v - log(this.len-1);
+                this.taylor3(this.len , 1) = v - log(this.len - 1);
             end
             this.taylor3(this.len , 2) = s;
         end
@@ -33,7 +33,12 @@
         % add a relationship term
         function [this] = addR(this , coefficient , order , comps )
             if coefficient ~= 0
-                newAdd.coefficient = coefficient ;
+                if coefficient < 0
+                    newAdd.coeNeg = 1;
+                else
+                    newAdd.coeNeg = 0;
+                end
+                newAdd.coeVal = log(abs(coefficient)) ;
                 newAdd.order = order ;
                 newAdd.comps = comps ;
                 this.rel = [this.rel newAdd];
@@ -42,7 +47,7 @@
         
         % compute all relatioins for this term and sum them up
         function [this] = compute(this)
-            if size(this.rel, 2) > 1
+            if size(this.rel, 2) ~= 1
                 next = zeros( size(this.rel, 2), 2);
                 for i = 1 : size(this.rel, 2)
                     [v, s] = this.computeItem( this.rel(i) );
@@ -70,8 +75,8 @@
             end
             v = k.comps.taylor3(o , 1);
             s = k.comps.taylor3(o , 2);
-            v = v + log(abs(k.coefficient));
-            if k.coefficient < 0
+            v = v + k.coeVal;
+            if k.coeNeg
                 s = -s;
             end
         end
