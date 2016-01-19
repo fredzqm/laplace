@@ -147,7 +147,6 @@ classdef simulator < handle
             [v , s] = unit.adder(1).lastTermLog();
         end
         
-        % used for comp5
         function unit = createUnit(this, initTime)
             for i = 1 : size(this.funct, 2)
                 unit.adder(i) = Adder( this.funct{i}(initTime) );
@@ -196,8 +195,6 @@ function repeatCompute(unit, order)
         for i = unit.adder
             i.compute();
         end
-%         x = unit.adder.taylor3
-%         y = unit.multer.taylor3
     end
     
 end
