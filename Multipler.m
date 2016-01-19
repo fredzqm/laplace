@@ -44,7 +44,6 @@ classdef Multipler < handle
             this.add( v , s );
         end
         
-        
         function [v , s] = lastTermLog(this)
             v = this.taylor3(this.len , 1) + multFactor.logfactorial(this.len-1);
             s = this.taylor3(this.len , 2);

@@ -4,7 +4,7 @@
     properties
         rel ; % relationship to other component
         taylor3 ; % taylor series, log(|coe|), coe*k^n/n!,
-        len ;% taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
+        len ; % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
     end
     
     methods

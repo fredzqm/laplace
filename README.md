@@ -3,7 +3,7 @@ A math research project, using PSM methods to find inverse Laplace transfer nume
 
 Simulator uses PSM methods to calculate numeric value and derivatives of function.
 
-Use Post’s Formula:
+Use Post’s Inversion Formula:
 <br>
 <img src='postsFormula.png'>
 <img src='postsFormulaPremise.png'>
