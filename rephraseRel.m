@@ -1,6 +1,6 @@
 function [adderRel, multRel] = rephraseRel(relation)
     displayRelation(relation); % display relationship inputed
-    
+    multRel = [];
     pq = PriorityQueue();
     for rel = relation
         addedList = sort(rel.comps);
