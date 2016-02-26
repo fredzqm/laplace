@@ -23,6 +23,7 @@ function [adderRel, multRel] = rephraseRel(relation)
             multRel(index).b.i = list(2);
             continue;
         end
+        flag = 0;
         for i = size(multRel, 2): -1 : 1
             [flag, diffList] = includedIn(multRel(i).list, list);
             if flag
@@ -49,16 +50,37 @@ function [adderRel, multRel] = rephraseRel(relation)
                     end
                 end
                 if found == 0
-                    pq.insert(list, size(list, 2));
-                    pq.insert(diffList, size(diffList, 2));
+                    if ( minCompList(list) >= minCompList(diffList) + 1 )
+                        pq.insert(list, size(list, 2));
+                        pq.insert(diffList, size(diffList, 2));
+                    else
+                        flag = 0;
+                        continue;
+                    end
                 end
                 break;
             end
         end
         if flag == 0
-            pq.insert(list, size(list, 2));
-            pq.insert(list(1:2), 2);
-            pq.insert(list(3:end), size(list,2) - 2);
+              pq.insert(list, size(list, 2) );
+              [a , b] = splitList(list)
+              if size(b, 2) == 0
+                  s = floor( size(a, 2) / 2 );
+                  if s == 1
+                      pq.insert(list(1: 2), 2);
+                  else
+                      pq.insert(list(1: s), s);
+                  end
+              else
+                  pq.insert(a, size(a, 2));
+                  pq.insert(b, size(b, 2));
+              end
+%             div = floor(size(list,2)/2);
+%             pq.insert(list, size(list, 2));
+%             pq.insert(list(1:div), div);
+%             if (compareElement( list(1:div) , list(div+1:end) ) ~= 0)
+%                 pq.insert(list(div+1:end), size(list,2) - div);
+%             end
         end
     end
     
@@ -171,6 +193,45 @@ function displayRelation(relation)
                 k.coefficient, k.order, compstr));
     end
     display(' ');
+end
+
+function [totalCount] = minCompList(list)
+    totalCount = 0;
+    if size(list, 2) == 0
+        return
+    end
+    num = list(1);
+    sameCount = 1;
+    for i = 2 : size(list, 2)
+        if ( num == list(i))
+            sameCount = sameCount + 1;
+        else
+            totalCount = totalCount + 1 + minCompMono(sameCount);
+            sameCount = 1;
+            num = list(i);
+        end
+    end
+    totalCount = totalCount + minCompMono(sameCount);
+end
+
+function [count] = minCompMono(c)
+    count = -2;
+    while (c ~= 0)
+        count = count + mod(c, 2) + 1;
+        c = floor( c / 2 );
+    end
+end
+
+
+function [a, b] = splitList(list)
+    for i = 1 : size(list,2)
+        if list(i) ~= list(1)
+            i = i - 1;
+            break;
+        end
+    end
+    a = list(1:i);
+    b = list(i+1:end);
 end
 
 
