@@ -158,7 +158,7 @@ classdef PriorityQueue < handle
 end
 
 
-function ret = compareElement(a , b)
+function ret = compareElement(a, b)
     ret = size(a, 2) - size(b, 2);
     for i = 1 : min(size(a, 2), size(b, 2))
         if a(i) < b(i)
