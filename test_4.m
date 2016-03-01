@@ -4,6 +4,9 @@ clear;
 a = 2;
 s = simulator( {@(s)1/(s+a)} , 1-a , ...
    [rel(1, -1, 0, [1 1]) ] );
+% s = simulator( [1/a] , 1-a , ...
+%    [rel(1, -1, 0, [1 1]) ] );
+
 
 %% compute
 s.minOrder = 10;

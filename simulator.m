@@ -1,7 +1,8 @@
 classdef simulator < handle
     
     properties (SetAccess = public)
-        funct; % ideal function of each term 
+        funct; % ideal function of each term
+        known;
         adderRel; % calculate multipler relationship
         multRel; % calculate multipler relationship
         f ;
@@ -17,6 +18,19 @@ classdef simulator < handle
         %                  -- relation (the relation of comps)
         function created = simulator(funct , initTime , relation)
             created.t = initTime;
+            if isa(funct, 'cell')
+                for i = 1 : size(funct, 2)
+                    if ~isa(funct{i}, 'function_handle')
+                        error('Exact functions should be given in the cell arrays');
+                    end
+                end
+                created.known = 1;
+            else
+                if ~isa(funct, 'double')
+                    error('initial values of elements should be given in the array');
+                end
+                created.known = 0;
+            end
             created.funct = funct;
             [created.adderRel, created.multRel] = rephraseRel(relation);
             created.seg = 1;
@@ -24,6 +38,17 @@ classdef simulator < handle
             repeatCompute(created.f, 10);
         end
         
+        function ret = simulatorValue(this, element, t)
+             if this.known
+                ret = this.funct{element}(t);
+             else
+                if size( this.f, 2) == 0
+                    ret = this.funct(element);
+                else
+                    ret = this.calc(element, t);
+                end
+             end
+        end
         % compute a certain time given the minResetTime and minorder 
         function compute(this , time)
             repeatCompute(this.f(this.seg) , this.minOrder);
@@ -45,13 +70,14 @@ classdef simulator < handle
         function reset(this , segDuration)
             resetTime = segDuration + this.t(this.seg);
             this.t = [this.t resetTime];
-            newSegComp = this.f(1,:);
-            for k = 1 : size( this.f , 2 )
-                newSegComp(k) = getAdder( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
-            end
+            newSegComp = this.createUnit(resetTime);
+%             newSegComp = this.f(1,:);
+%             for k = 1 : size( this.f , 2 )
+%                 newSegComp(k) = Adder( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
+%             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
-            start(this.relation , newSegComp, this.t(this.seg) );
+%             start(this.relation , newSegComp, this.t(this.seg) );
         end
        
         % used to find the threshold hold to turn into the next segment.
@@ -149,7 +175,7 @@ classdef simulator < handle
         
         function unit = createUnit(this, initTime)
             for i = 1 : size(this.funct, 2)
-                unit.adder(i) = Adder( this.funct{i}(initTime) );
+                unit.adder(i) = Adder( this.simulatorValue(i, initTime) );
             end
             for i = 1 : size(this.multRel, 2)
                 mult = this.multRel(i);
