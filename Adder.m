@@ -95,14 +95,9 @@
             s = this.taylor3(this.len , 2);
         end
         
-        function v = func(this, t)
-            x = t .* (1:this.len)' + this.taylor3(: , 1);
-            x = exp(x) .* this.taylor3(: , 2);
-            v = sum(x);
-        end
-        function v = deriv(this, t, order)
+        function v = calc(this, t, order)
             if order == 0
-                x = t .* (1:this.len)' + this.taylor3(: , 1);
+                x = log(t) .* (0:this.len-1)' + this.taylor3(: , 1);
                 x = exp(x) .* this.taylor3(: , 2);
                 v = sum(x);
 %             else

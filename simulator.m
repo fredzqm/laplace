@@ -45,10 +45,11 @@ classdef simulator < handle
                 if size( this.f, 2) == 0
                     ret = this.funct(element);
                 else
-                    ret = this.calc(element, t);
+                    ret = this.calc(element, t, 0);
                 end
              end
         end
+        
         % compute a certain time given the minResetTime and minorder 
         function compute(this , time)
             repeatCompute(this.f(this.seg) , this.minOrder);
@@ -85,22 +86,36 @@ classdef simulator < handle
             end
         end
        
-        % calculate the value of time array tt
-        function vv = func(this , tt)
-            vv = tt ;
-            segn = 1;
-            upper = this.findThresh(1);
-            for i = 1 : size(tt , 2)
-                while tt(i) > upper
-                    segn = segn + 1;
-                    upper = this.findThresh(segn);
-                end
-                vv(i) = this.f(segn).adder(1).func( tt(i) - this.t(segn));
-            end
-        end
+%         % calculate the value of time array tt
+%         function vv = func(this , tt)
+%             vv = tt ;
+%             segn = 1;
+%             upper = this.findThresh(1);
+%             for i = 1 : size(tt , 2)
+%                 while tt(i) > upper
+%                     segn = segn + 1;
+%                     upper = this.findThresh(segn);
+%                 end
+%                 vv(i) = this.f(segn).adder(1).func( tt(i) - this.t(segn));
+%             end
+%         end
+%         
+%         % find the value of k-th order derivative of time arry tt
+%         function vv = deriv(this , tt , k)
+%             vv = tt ;
+%             segn = 1;
+%             upper = this.findThresh(1);
+%             for i = 1 : size(tt , 2)
+%                 while tt(i) > upper
+%                     segn = segn + 1;
+%                     upper = this.findThresh(segn);
+%                 end
+%                 vv(i) = this.f(segn).adder(1).deriv( tt(i) - this.t(segn ) , k );
+%                 continue;
+%             end
+%         end
         
-        % find the value of k-th order derivative of time arry tt
-        function vv = deriv(this , tt , k)
+        function vv = calc(this, element, tt, order)
             vv = tt ;
             segn = 1;
             upper = this.findThresh(1);
@@ -109,15 +124,15 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn).adder(1).deriv( tt(i) - this.t(segn ) , k );
+                vv(i) = this.f(segn).adder(element).calc( tt(i) - this.t(segn), order);
                 continue;
-            end
+            end            
         end
         
         % plot the function and make comparasion
         function plot(this , tt , compare)
             tts = min(tt): (max(tt)-min(tt))/70 : max(tt);
-            plot( tt , this.func(tt) , '-'  , tts , compare(tts) , '.');             
+            plot( tt , this.calc(1, tt, 0) , '-'  , tts , compare(tts) , '.');             
         end
         
         % plot the comparative error
@@ -128,7 +143,7 @@ classdef simulator < handle
         % plot the derivative
         function plotDeriv(this , tt , order)
             hold on
-            plot( tt , this.deriv(tt , order) , 'y');  
+            plot( tt , this.calc(1, tt, order) , 'y');  
         end
 
         % plot the curve to show convergence. will be used to find inverse laplace

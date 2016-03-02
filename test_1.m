@@ -14,6 +14,6 @@ s.compute(20);
 figure(1)
 hold off
 answer = @(x) sin(x);
-t = 1 :0.01: 10 ;
+t = 0 :0.01: 10 ;
 s.plot( t , answer );
 
