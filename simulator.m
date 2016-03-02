@@ -71,13 +71,8 @@ classdef simulator < handle
             resetTime = segDuration + this.t(this.seg);
             this.t = [this.t resetTime];
             newSegComp = this.createUnit(resetTime);
-%             newSegComp = this.f(1,:);
-%             for k = 1 : size( this.f , 2 )
-%                 newSegComp(k) = Adder( this.f(this.seg,k).calc( resetTime - this.t(this.seg) , 0) ) ;
-%             end
             this.f = [this.f ; newSegComp];
             this.seg = this.seg + 1;
-%             start(this.relation , newSegComp, this.t(this.seg) );
         end
        
         % used to find the threshold hold to turn into the next segment.
@@ -100,7 +95,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn).adder(1).calc( tt(i) - this.t(segn) , 0);
+                vv(i) = this.f(segn).adder(1).func( tt(i) - this.t(segn));
             end
         end
         
@@ -114,7 +109,7 @@ classdef simulator < handle
                     segn = segn + 1;
                     upper = this.findThresh(segn);
                 end
-                vv(i) = this.f(segn).adder(1).calc( tt(i) - this.t(segn) , k );
+                vv(i) = this.f(segn).adder(1).deriv( tt(i) - this.t(segn ) , k );
                 continue;
             end
         end
@@ -170,9 +165,13 @@ classdef simulator < handle
         function [v , s] = derivAcclog(this , t , k)
             unit = this.createUnit(t);
             repeatCompute(unit, k);
-            [v , s] = unit.adder(1).lastTermLog();
+            [v , s] = unit.adder(1).highestTermDerivLog();
         end
         
+        
+        % create a computational unit with initial value provided with 
+        % this.simulatorValue(), which return the accurate function value
+        % if known, otherwise estimate with PSM.
         function unit = createUnit(this, initTime)
             for i = 1 : size(this.funct, 2)
                 unit.adder(i) = Adder( this.simulatorValue(i, initTime) );

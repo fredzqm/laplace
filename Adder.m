@@ -4,6 +4,7 @@
     properties
         rel ; % relationship to other component
         taylor3 ; % taylor series, log(|coe|), coe*k^n/n!,
+        taylor2 ; % use for derivative
         len ; % taylor3(:,1) store log(|coe|), while taylor3(:,2) store sign(coe)
     end
     
@@ -27,6 +28,14 @@
                 this.taylor3(this.len , 1) = v - log(this.len - 1);
             end
             this.taylor3(this.len , 2) = s;
+        end
+        
+        function [this] = updateDerv(this)
+            if size(this.taylor3, 1) > size(this.taylor2, 1)
+                for i = size(this.taylor2, 1) + 1 : size(this.taylor3, 1)
+                    this.taylor2(i , 1) = this.taylor3(i , 1) + multFactor.logfactorial(i-1);
+                end
+            end
         end
         
         % call comp.addR( coefficient , order , list of comps multiplied ] );
@@ -81,9 +90,25 @@
             end
         end
         
-        function [v , s] = lastTermLog(this)
+        function [v , s] = highestTermDerivLog(this)
             v = this.taylor3(this.len , 1) + multFactor.logfactorial(this.len-1);
             s = this.taylor3(this.len , 2);
         end
+        
+        function v = func(this, t)
+            x = t .* (1:this.len)' + this.taylor3(: , 1);
+            x = exp(x) .* this.taylor3(: , 2);
+            v = sum(x);
+        end
+        function v = deriv(this, t, order)
+            if order == 0
+                x = t .* (1:this.len)' + this.taylor3(: , 1);
+                x = exp(x) .* this.taylor3(: , 2);
+                v = sum(x);
+%             else
+%                 this.updateDerv(this)
+            end
+        end
+        
     end       
 end
