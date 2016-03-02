@@ -77,7 +77,6 @@ classdef simulator < handle
         end
        
         % used to find the threshold hold to turn into the next segment.
-        % used for func() and deriv()
         function thresh = findThresh(this, seg)
             if size(this.t , 2) < seg + 1
                 thresh = inf;
@@ -85,35 +84,6 @@ classdef simulator < handle
                 thresh = this.t(seg + 1);
             end
         end
-       
-%         % calculate the value of time array tt
-%         function vv = func(this , tt)
-%             vv = tt ;
-%             segn = 1;
-%             upper = this.findThresh(1);
-%             for i = 1 : size(tt , 2)
-%                 while tt(i) > upper
-%                     segn = segn + 1;
-%                     upper = this.findThresh(segn);
-%                 end
-%                 vv(i) = this.f(segn).adder(1).func( tt(i) - this.t(segn));
-%             end
-%         end
-%         
-%         % find the value of k-th order derivative of time arry tt
-%         function vv = deriv(this , tt , k)
-%             vv = tt ;
-%             segn = 1;
-%             upper = this.findThresh(1);
-%             for i = 1 : size(tt , 2)
-%                 while tt(i) > upper
-%                     segn = segn + 1;
-%                     upper = this.findThresh(segn);
-%                 end
-%                 vv(i) = this.f(segn).adder(1).deriv( tt(i) - this.t(segn ) , k );
-%                 continue;
-%             end
-%         end
         
         function vv = calc(this, element, tt, order)
             vv = tt ;
@@ -137,7 +107,7 @@ classdef simulator < handle
         
         % plot the comparative error
         function plotError(this , tt , compare)
-            plot( tt , this.func(tt)./compare(tt)-1 );             
+            plot( tt , this.calc(1, tt, 0)./compare(tt)-1 );             
         end
         
         % plot the derivative

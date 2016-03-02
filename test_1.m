@@ -16,4 +16,4 @@ hold off
 answer = @(x) sin(x);
 t = 0 :0.01: 10 ;
 s.plot( t , answer );
-
+s.plotDeriv( t , 1);

@@ -100,10 +100,23 @@
                 x = log(t) .* (0:this.len-1)' + this.taylor3(: , 1);
                 x = exp(x) .* this.taylor3(: , 2);
                 v = sum(x);
-%             else
-%                 this.updateDerv(this)
+            else
+                this.updateDerv();
+                x = log(t) .* (0:this.len-order-1)' + this.taylor2(1+order:end , 1);
+                for i = 1 : this.len-order
+                    x(i) = x(i) - multFactor.logfactorial(i-1);
+                end
+                x = exp(x) .* this.taylor3(1+order:end , 2);
+                v = sum(x);
             end
         end
+        
+%         function v = calc(this, t , derivOrder)
+%             v = this.taylor2(this.len) ;
+%             for  i = this.len - 1 : -1 : derivOrder + 1
+%                 v = v * t / (i - derivOrder) + this.taylor2( i ) ;
+%             end
+%         end
         
     end       
 end

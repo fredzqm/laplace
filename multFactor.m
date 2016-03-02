@@ -71,7 +71,7 @@ classdef multFactor
         function m = logfactorial(k)
             persistent data;
             if k <= 0
-                m = 1;
+                m = 0;
                 return;
             end
             s = size( data );
