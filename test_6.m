@@ -7,14 +7,14 @@ s = simulator( {@(s)s/(s*s+1) @(s)1/(s*s+1)} , 0, ...
 
 %% compute
 s.minOrder = 3;
-s.minResetTime = 0.001;
+s.minResetTime = 0.01;
 s.compute(10);
 
 %% plot taylor
 figure(2)
 hold off
 answer = @(x) x ./(x.*x + 1);
-t = 0.5 :0.01: 30 ;
+t = 25 :0.01: 40 ;
 s.plot( t , answer );
 % s.plotDeriv( t , 1); 
 % s.plotDeriv( t , 2);
@@ -29,4 +29,5 @@ hold off
 t = 50;
 kk = 1 : 500 : 10000;
 answer = cos(t);
-vv = s.converge( t, kk , answer);
+vv = s.converge( t , kk);
+plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');

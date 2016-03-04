@@ -122,22 +122,28 @@ classdef simulator < handle
         % It uses funct to initialize an array of comps used to cacluate
         % the derivative, so it depends on derivAcc but not on func().
         % We can use this function immediately after initialization
-        function vv = converge(this, t, kk)
+        function vv = converge(this, t, kk , answer)
             vv = kk;
+            aa = kk;
+            aa(:) = answer;
             stepSize = 60;
             next = 0;
             for i = 1 : size(kk,2)
-                vv(i) = this.postInversion(kk(i), t);
-                if kk(i) >=  next
+                k = kk(i);
+                a = multFactor.stir(k);
+                b = (k+1) * log(t);
+                [c , s] = this.derivAcclog(k/t , k);
+                vv(i) = exp( a - b + c );
+                if (s > 0) == mod(k,2) 
+                    vv(i) = - vv(i);
+                end
+                if k >=  next
                     next = (floor(kk(i)/stepSize)+1) * stepSize;
-                    fprintf('Computing converge ... k = %2d \n', kk(i));
+                    fprintf('Computing converge ... k = %2d \n', k);
                 end
             end
             fprintf('Finish computing converge\n');
-        end
-        
-        function vv = inverseTransform(tt , answer)
-            
+            plot(kk , vv ,'-', kk , aa , '.');
         end
         
         function v = postInversion(this, k, t)
@@ -146,7 +152,7 @@ classdef simulator < handle
             [c , s] = this.derivAcclog(k/t , k);
             v = exp( a - b + c );
             if (s > 0) == mod(k,2) 
-                v = - v;
+                v =
             end
         end
         function [v , s] = derivAcclog(this , t , k)

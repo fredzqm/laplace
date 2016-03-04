@@ -28,4 +28,13 @@ hold off
 t = 50;
 kk = 1 : 500 : 10000;
 answer = sin(t);
-vv = s.converge( t , kk , answer);
+vv = s.converge( t , kk);
+plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
+
+%% convergence
+figure(4)
+hold off
+tt = 1 : 10;
+answer = @(t) sin(t);
+vv = s.inverseTransform( tt , answer);
+plot(tt, vv, tt, answer(tt));

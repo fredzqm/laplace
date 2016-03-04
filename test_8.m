@@ -13,4 +13,5 @@ hold off
 t = 50;
 kk = 1000 : 100 : 20000;
 answer = cosh(b*t);
-vv = s.converge( t, kk , answer);
+vv = s.converge( t , kk);
+plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
