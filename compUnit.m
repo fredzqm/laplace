@@ -11,10 +11,12 @@ classdef compUnit
         % if known, otherwise estimate with PSM.
         function unit = compUnit(simulator, initTime)
             unit.t = initTime;
-            unit.adder = Adder(0);
-            unit.multer = Multipler(unit.adder, unit.adder);
             for i = 1 : size(simulator.funct, 2)
-                unit.adder(i) = Adder( simulator.simulatorValue(i, initTime) );
+                if i == 1
+                    unit.adder = Adder( simulator.simulatorValue(i, initTime) );
+                else
+                    unit.adder(i) = Adder( simulator.simulatorValue(i, initTime) );
+                end
             end
             for i = 1 : size(simulator.multRel, 2)
                 mult = simulator.multRel(i);
@@ -28,7 +30,11 @@ classdef compUnit
                 else
                     b = unit.adder(mult.b.i);
                 end
-                unit.multer(i) = Multipler(a, b);
+                if i == 1
+                    unit.multer = Multipler(a, b);
+                else
+                    unit.multer(i) = Multipler(a, b);
+                end
             end
             
             for i = 1 : size(simulator.adderRel, 2)

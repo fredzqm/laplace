@@ -229,10 +229,8 @@ end
 % repeat compute all comps order times.
 function repeatCompute(unit, order)
     for k = 1 : order
-        if isfield( unit , 'multer')
-            for i = unit.multer
-                i.compute();
-            end
+        for i = unit.multer
+            i.compute();
         end
         for i = unit.adder
             i.compute();
