@@ -210,7 +210,7 @@ classdef simulator < handle
         function [v , s] = derivAcclog(this , t , k)
             unit = this.createUnit(t);
             repeatCompute(unit, k);
-            [v , s] = unit.adder(1).derivLog(k);
+            [v , s] = unit.adder(1).derivLog(k + 1);
         end
    
         
