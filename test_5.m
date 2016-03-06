@@ -25,8 +25,8 @@ s.plotError(t,answer);
 %% convergence
 figure(1)
 hold off
-t = 50;
-kk = 1 : 100 : 1000;
+t = 5;
+kk = 1 : 500 : 10000;
 answer = sin(t);
 vv = s.converge( t , kk);
 plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
