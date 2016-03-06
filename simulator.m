@@ -1,13 +1,19 @@
 classdef simulator < handle
     
     properties (SetAccess = public)
-        funct; % ideal function of each term
         known;
+        % represent the differential equation system
+        funct; % ideal function of each term
         adderRel; % calculate multipler relationship
         multRel; % calculate multipler relationship
+        
+        % represent the computational units in this simulator
         f ;
         t ; % start time of each segment
+        
         seg; % the last segment
+        
+        % configuration for computing
         minResetTime = 0.05; % default minResetTime
         minOrder = 20; % default minOrder
     end
@@ -204,45 +210,15 @@ classdef simulator < handle
         function [v , s] = derivAcclog(this , t , k)
             unit = this.createUnit(t);
             repeatCompute(unit, k);
-            [v , s] = unit.adder(1).highestTermDerivLog();
+            [v , s] = unit.adder(1).derivLog(k);
         end
-        
+   
         
         % create a computational unit with initial value provided with 
         % this.simulatorValue(), which return the accurate function value
         % if known, otherwise estimate with PSM.
         function unit = createUnit(this, initTime)
-            for i = 1 : size(this.funct, 2)
-                unit.adder(i) = Adder( this.simulatorValue(i, initTime) );
-            end
-            for i = 1 : size(this.multRel, 2)
-                mult = this.multRel(i);
-                if mult.a.t
-                    a = unit.multer(mult.a.i);
-                else
-                    a = unit.adder(mult.a.i);
-                end
-                if mult.b.t
-                    b = unit.multer(mult.b.i);
-                else
-                    b = unit.adder(mult.b.i);
-                end
-                unit.multer(i) = Multipler(a, b);
-            end
-            
-            for i = 1 : size(this.adderRel, 2)
-                for k = this.adderRel(i).list
-                    if k.multer.t
-                        comps = unit.multer(k.multer.i);
-                    else
-                        comps = unit.adder(k.multer.i);
-                    end
-                    for order = 0 : k.order
-                        unit.adder(i).addR(k.coefficient*nchoosek(k.order,order)...
-                            *initTime^order , k.order - order ,  comps );
-                    end
-                end
-            end
+            unit = compUnit(this, initTime);
         end
         
     end

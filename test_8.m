@@ -16,7 +16,7 @@ s.compute(10);
 figure(2)
 hold off
 answer = @(s) s ./(s.^2-b.^2);
-t = 0 :0.01: 0.9 ;
+t = 0 :0.01: 0.99 ;
 s.plot( t , answer );
 % s.plotDeriv( t , 1); 
 % s.plotDeriv( t , 2);
@@ -29,7 +29,7 @@ s.plotError(t,answer);
 figure(1)
 hold off
 t = 5;
-kk = 10000 : 1000 : 100000;
+kk = 10000 : 50000 : 100000;
 answer = cosh(b*t);
 vv = s.converge( t , kk);
 plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');

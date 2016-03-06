@@ -38,6 +38,12 @@
             end
         end
         
+        function [v , s] = derivLog(this, order)
+            this.updateDerv();
+            v = this.taylor2(order , 1);
+            s = this.taylor3(order , 2);
+        end
+        
         % call comp.addR( coefficient , order , list of comps multiplied ] );
         % add a relationship term
         function [this] = addR(this , coefficient , order , comps )
@@ -88,11 +94,6 @@
             if k.coeNeg
                 s = -s;
             end
-        end
-        
-        function [v , s] = highestTermDerivLog(this)
-            v = this.taylor3(this.len , 1) + multFactor.logfactorial(this.len-1);
-            s = this.taylor3(this.len , 2);
         end
         
         function v = calc(this, t, order)
