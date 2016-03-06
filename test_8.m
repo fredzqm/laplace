@@ -7,11 +7,29 @@ s = simulator( {@(s)s/(s^2-b^2) ...
    [ rel(1, 1, 1, 2)  rel(1, -2, 2, [2 2]) ...
      rel(2,-2, 1, [2 2]) ] );
 
+ %% compute
+s.minOrder = 10;
+s.minResetTime = 0.01;
+s.compute(10);
+
+%% plot taylor
+figure(2)
+hold off
+answer = @(s) s ./(s.^2-b.^2);
+t = 0 :0.01: 0.9 ;
+s.plot( t , answer );
+% s.plotDeriv( t , 1); 
+% s.plotDeriv( t , 2);
+
+%% plot error
+figure(3)
+s.plotError(t,answer);
+
 %% convergence
 figure(1)
 hold off
-t = 50;
-kk = 1000 : 300 : 20000;
+t = 5;
+kk = 10000 : 1000 : 100000;
 answer = cosh(b*t);
 vv = s.converge( t , kk);
 plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
@@ -20,8 +38,8 @@ plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
 figure(4)
 hold off
 tt = 0 : 0.01 : 1;
-k = @(t) t .* t * 10 + 100;
-answer = @(t) cosh(b*t);
+k = @(t) 2000;
+answer = @(t) cosh(t);
 vv = s.converge( tt, ceil(k(tt)));
 plot(tt, vv ,'-', tt, answer(tt), '.');
 

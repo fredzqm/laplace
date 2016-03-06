@@ -14,7 +14,7 @@ s.compute(10);
 figure(2)
 hold off
 answer = @(s) 2*(3*s.*s-1)./(3*s.*s+1).^3;
-t = 0 :0.01: 1 ;
+t = 0 :0.01: 10 ;
 s.plot( t , answer );
 % s.plotDeriv( t , 1); 
 % s.plotDeriv( t , 2);

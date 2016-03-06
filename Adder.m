@@ -96,27 +96,33 @@
         end
         
         function v = calc(this, t, order)
+            s = sign(t);
+            t = abs(t);
             if order == 0
+                if s == 0
+                    v =  exp(this.taylor3(1, 1)) * this.taylor3(1 , 2);
+                    return;
+                end
                 x = log(t) .* (0:this.len-1)' + this.taylor3(: , 1);
                 x = exp(x) .* this.taylor3(: , 2);
-                v = sum(x);
             else
                 this.updateDerv();
+                if s == 0
+                    v =  exp(this.taylor2(1+order, 1)) * this.taylor3(1+order , 2);
+                    return;
+                end
                 x = log(t) .* (0:this.len-order-1)' + this.taylor2(1+order:end , 1);
                 for i = 1 : this.len-order
                     x(i) = x(i) - multFactor.logfactorial(i-1);
                 end
                 x = exp(x) .* this.taylor3(1+order:end , 2);
-                v = sum(x);
             end
+            if s == -1
+                x = x .* (-1).^(0:size(x,2)-1);
+            end
+            v = sum(x);
         end
-        
-%         function v = calc(this, t , derivOrder)
-%             v = this.taylor2(this.len) ;
-%             for  i = this.len - 1 : -1 : derivOrder + 1
-%                 v = v * t / (i - derivOrder) + this.taylor2( i ) ;
-%             end
-%         end
+       
         
     end       
 end
