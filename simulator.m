@@ -107,9 +107,9 @@ classdef simulator < handle
         
         % plot the comparative error
         function plotError(this , tt , compare)
-            plot( tt , this.calc(1, tt, 0)./compare(tt)-1 );             
+            err(tt, this.calc(1, tt, 0) , compare);
         end
-        
+               
         % plot the derivative
         function plotDeriv(this , tt , order)
             hold on
@@ -122,24 +122,29 @@ classdef simulator < handle
         % It uses funct to initialize an array of comps used to cacluate
         % the derivative, so it depends on derivAcc but not on func().
         % We can use this function immediately after initialization
-        function vv = converge(this, t, kk)
-            vv = kk;
-            stepSize = 60;
-            next = 0;
+        function vv = converge(this, tt, kk)
+            if size(tt, 2) ~= size(kk, 2)
+                if size(tt, 1) == 1 && size(tt, 2) == 1 
+                    tt = tt * ones(1, size(kk,2));
+                end
+                if size(kk, 1) == 1 && size(kk, 2) == 1 
+                    kk = kk * ones(1, size(tt,2));
+                end
+            end
+            vv = zeros(1, size(tt,2));
+           
+            status = 0;
+            u = size(kk,2);
             for i = 1 : size(kk,2)
-                vv(i) = this.postInversion(kk(i), t);
-                if kk(i) >=  next
-                    next = (floor(kk(i)/stepSize)+1) * stepSize;
-                    fprintf('Computing converge ... k = %2d \n', kk(i));
+                vv(i) = this.postInversion(kk(i), tt(i));
+                if i/u - status > 0.01
+                    status = i/u;
+                    fprintf('Computing %2d%% ... k = %2d t = %2f \n',uint8(status*100), kk(i), tt(i));
                 end
             end
             fprintf('Finish computing converge\n');
         end
-        
-        function vv = inverseTransform(tt , answer)
-            
-        end
-        
+                
         function v = postInversion(this, k, t)
             a = multFactor.stir(k);
             b = (k+1) * log(t);
@@ -149,6 +154,7 @@ classdef simulator < handle
                 v = - v;
             end
         end
+        
         function [v , s] = derivAcclog(this , t , k)
             unit = this.createUnit(t);
             repeatCompute(unit, k);

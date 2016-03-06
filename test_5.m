@@ -18,23 +18,28 @@ s.plot( t , answer );
 s.plotDeriv( t , 1);
 % s.plotDeriv( t , 2);
 %
-% %% plot error
+%% plot error
 figure(3)
 s.plotError(t,answer);
 
 %% convergence
 figure(1)
 hold off
-t = 50;
+t = 5;
 kk = 1 : 500 : 10000;
 answer = sin(t);
 vv = s.converge( t , kk);
 plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
 
-%% convergence
+%% inverseTransform
 figure(4)
 hold off
-tt = 1 : 10;
+tt = 0 : 1 : 20;
+k = @(t) t .* t + 10;
 answer = @(t) sin(t);
-vv = s.inverseTransform( tt , answer);
-plot(tt, vv, tt, answer(tt));
+vv = s.converge( tt, ceil(k(tt)));
+plot(tt, vv ,'-', tt, answer(tt), '.');
+
+figure(5)
+plot(tt, vv - answer(tt) ,'-');
+

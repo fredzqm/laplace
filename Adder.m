@@ -13,7 +13,7 @@
         function newComp = Adder( init )
             newComp.rel = [];
             newComp.taylor3(1,2) = sign(init);
-            if sign(init)
+            if sign(init) ~= 0
                 newComp.taylor3(1,1) = log(abs(init));
             end
             newComp.len = 1;

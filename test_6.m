@@ -14,7 +14,7 @@ s.compute(10);
 figure(2)
 hold off
 answer = @(x) x ./(x.*x + 1);
-t = 25 :0.01: 40 ;
+t = 0 :0.01: 40 ;
 s.plot( t , answer );
 % s.plotDeriv( t , 1); 
 % s.plotDeriv( t , 2);
@@ -31,3 +31,16 @@ kk = 1 : 500 : 10000;
 answer = cos(t);
 vv = s.converge( t , kk);
 plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
+
+%% inverseTransform
+figure(4)
+hold off
+tt = 0 : 0.5 : 20;
+k = @(t) t .* t * 10 + 100;
+answer = @(t) cos(t);
+vv = s.converge( tt, ceil(k(tt)));
+plot(tt, vv ,'-', tt, answer(tt), '.');
+
+figure(5)
+err(tt, vv, answer);
+

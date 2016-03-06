@@ -16,3 +16,7 @@ hold off
 answer = @(x) sqrt(x+1).*cos(x.^2);
 t = 0 :0.01: 10 ;
 s.plot( t , answer );
+
+%% plot error
+figure(3)
+s.plotError(t,answer);

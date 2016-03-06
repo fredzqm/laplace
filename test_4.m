@@ -20,6 +20,10 @@ answer = @(s) 1./(s+a);
 t = 1 :0.01: 20;
 s.plot( t , answer );
 
+%% plot 
+figure(3)
+s.plotError(t,answer);
+
 %% convergence
 figure(2)
 hold off
