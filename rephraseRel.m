@@ -75,12 +75,6 @@ function [adderRel, multRel] = rephraseRel(relation)
                   pq.insert(a, size(a, 2));
                   pq.insert(b, size(b, 2));
               end
-%             div = floor(size(list,2)/2);
-%             pq.insert(list, size(list, 2));
-%             pq.insert(list(1:div), div);
-%             if (compareElement( list(1:div) , list(div+1:end) ) ~= 0)
-%                 pq.insert(list(div+1:end), size(list,2) - div);
-%             end
         end
     end
     
@@ -143,13 +137,29 @@ function [ret, diffList] = includedIn(a, b)
     end
 end
 
+function displayRelation(relation)
+    display('Input relation meaning');
+    for k = relation
+        compstr = '';
+        for i = 1 : size(k.comps,2)
+            if i ~= 1
+                compstr = strcat(compstr, ' * ');
+            end
+            compstr = strcat(compstr, sprintf('Comp%d', k.comps(i)) );
+        end
+        display(sprintf('Comp%d += %s * t^%d * %s', k.addTo , ...
+               realNum(k.coefficient), k.order, compstr));
+    end
+    display(' ');
+end
+
 
 function displayConvertedRel(adderRel, multRel)
     display('Output computational model meaning');
     for i = 1 : size(adderRel, 2)
         adder = '';
         for j = 1 : size(adderRel(i).list, 2)
-            added = sprintf(' %2d * t^%d * %s  ' , adderRel(i).list(j).coefficient, ...
+            added = sprintf(' %s * t^%d * %s  ' , realNum(adderRel(i).list(j).coefficient), ...
                 adderRel(i).list(j).order, str(adderRel(i).list(j).multer) );
             if j ~= 1
                 adder = strcat(adder, '  +  ');
@@ -178,21 +188,13 @@ function s = str(a)
     end
 end
 
-
-function displayRelation(relation)
-    display('Input relation meaning');
-    for k = relation
-        compstr = '';
-        for i = 1 : size(k.comps,2)
-            if i ~= 1
-                compstr = strcat(compstr, ' * ');
-            end
-            compstr = strcat(compstr, sprintf('Comp%d', k.comps(i)) );
-        end
-        display(sprintf('Comp%d += %2d * t^%d * %s', k.addTo, ...
-                k.coefficient, k.order, compstr));
+function s = realNum(x)
+    if ceil(x) == x
+        s = sprintf('%d', x);
+    else
+        [N,D] = rat(x);
+        s = sprintf('%d/%d', N, D);
     end
-    display(' ');
 end
 
 function [totalCount] = minCompList(list)
