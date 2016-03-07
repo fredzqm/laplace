@@ -9,9 +9,9 @@ classdef simulator < handle
         
         % represent the computational units in this simulator
         f ;
-        t ; % start time of each segment
+%         t ; % start time of each segment
         
-        seg; % the last segment
+        computeTill; % the last segment
         
         % configuration for computing
         minResetTime = 0.05; % default minResetTime
@@ -23,7 +23,7 @@ classdef simulator < handle
         %                  -- initTime (the time to start compute)
         %                  -- relation (the relation of comps)
         function created = simulator(funct , initTime , relation)
-            created.t = initTime;
+%             created.t = initTime;
             if isa(funct, 'cell')
                 for i = 1 : size(funct, 2)
                     if ~isa(funct{i}, 'function_handle')
@@ -39,9 +39,13 @@ classdef simulator < handle
             end
             created.funct = funct;
             [created.adderRel, created.multRel] = rephraseRel(relation);
-            created.seg = 1;
-            created.f = created.createUnit(initTime);
+            created.computeTill = initTime;
+            created.f = compUnit(created, initTime);
             repeatCompute(created.f, 10);
+        end
+        
+        function v = t(this, index)
+            v = this.f(index).t;
         end
         
         function ret = simulatorValue(this, element, t)
@@ -58,31 +62,27 @@ classdef simulator < handle
         
         % compute a certain time given the minResetTime and minorder 
         function compute(this , time)
-            repeatCompute(this.f(this.seg) , this.minOrder);
+            [index, upper] = this.findIndex(this.computeTill);
+            if this.known == 0 && upper ~= inf
+                % those compUnits might not be accurate enough
+                this.f(index+1:end) = []; 
+            end
+            repeatCompute(this.f(index) , this.minOrder);
             u = ceil( time / this.minResetTime );
-            start = this.t(this.seg);
             status = 0;
             fprintf('Start computing\n');
             for x = 1 : u
-                this.reset(start + x * this.minResetTime);
-                repeatCompute(this.f(this.seg) , this.minOrder);
+                unit = this.createUnit(this.computeTill + x * this.minResetTime);
+                repeatCompute(unit , this.minOrder);
                 if x/u - status > 0.01
                     status = x/u;
                     fprintf('Computing ... %2d %%\n', uint8(status*100));
                 end
             end
             fprintf('Finish computing\n');
+            this.computeTill = this.computeTill + u * this.minResetTime;
         end
-        
-        % reset the computation process at segDuration time after the last
-        % seg starts
-        function reset(this , resetTime)
-            this.t = [this.t resetTime];
-            newSegComp = this.createUnit(resetTime);
-            this.f = [this.f ; newSegComp];
-            this.seg = this.seg + 1;
-        end
-        
+                
         % note that tt should be a tiem array in ascending order
         function vv = calc(this, element, tt, order)
             vv = tt ;
@@ -97,7 +97,7 @@ classdef simulator < handle
         end
         
         function [index, upper] = findIndex(this, t, pre)
-            high = size(this.t, 2);
+            high = size(this.f, 1);
             if nargin > 3 && pre + 2 <= high
                 if this.t(pre+1) < t && this.t(pre+2) > t
                     index = pre + 1;
@@ -218,7 +218,20 @@ classdef simulator < handle
         % this.simulatorValue(), which return the accurate function value
         % if known, otherwise estimate with PSM.
         function unit = createUnit(this, initTime)
-            unit = compUnit(this, initTime);
+            [index, upper] = this.findIndex(initTime);
+            if this.t(index) == initTime
+                unit = this.f(index);
+            else
+                unit = compUnit(this, initTime);
+                if upper == inf
+                    this.f = [this.f ; unit];
+                else
+                    this.f = [this.f(1:index); unit; this.f(index+1:end)];
+                end
+%                 if initTime > this.computeTil & initTime <= this.computeTil + this.minResetTime
+%                     this.computeTil = this;
+%                 end
+            end
         end
         
     end

@@ -26,7 +26,7 @@ s.plotError(t,answer);
 %% convergence
 figure(1)
 hold off
-t = 50;
+t = 10.2;
 kk = 1 : 500 : 10000;
 answer = cos(t);
 vv = s.converge( t , kk);
