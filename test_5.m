@@ -34,8 +34,8 @@ plot(kk , vv ,'-', kk , ones(1, size(kk,2)) * answer , '.');
 %% inverseTransform
 figure(4)
 hold off
-tt = 0 : 1 : 20;
-k = @(t) t .* t + 10;
+tt = 0 : 0.1 : 20;
+k = @(t) t .^3 + 100;
 answer = @(t) sin(t);
 vv = s.converge( tt, ceil(k(tt)));
 plot(tt, vv ,'-', tt, answer(tt), '.');

@@ -15,7 +15,7 @@ classdef simulator < handle
         
         % configuration for computing
         minResetTime = 0.05; % default minResetTime
-        minOrder = 20; % default minOrder
+        minOrder = 5    ; % default minOrder
     end
 
     methods

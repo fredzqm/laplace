@@ -13,8 +13,7 @@ classdef rel
             newAdd.order = order ;
             newAdd.comps = comps ;
         end
-        
-        
+                
         function r = normalize(r)
             if size(r.comps, 1) > 1
                 return;
