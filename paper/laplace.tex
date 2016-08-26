@@ -5,12 +5,21 @@
 \usepackage{algpseudocode}
 \usepackage{listings}
 \usepackage{comment}
-\pagestyle{empty}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
 \textheight=8.5in
 \textwidth=7in
 \oddsidemargin=0.0in
+
+\pagestyle{fancy}
+\fancyhf{}
+\rfoot{Page \thepage \hspace{1pt} of \pageref{LastPage}}
+
+
 \begin{document}
-\centerline{\Large Inverse Laplace transform and Post Inversion Formula \#7}
+\centerline{\Large Inverse Laplace transform and Post Inversion Formula}
 \vspace{1cm}
 
 \newsavebox\foobox
@@ -34,42 +43,49 @@
 Laplace transform and inverse Laplace are powerful mathematical tools. Here is the definition of Laplace transform:
 $$F(s) = \int_{0}^{\8} e^{-st} f(t) dt$$
 
-However, there is not an easy way to perform inverse Laplace transform on an arbitrary function. Fourier-integral is shown to be identical to inverse Laplace transform. However, computing a complex contour integral is nontrivial. Most of the time, we choose to match parts to known transform formula. There is no guarantee that this method will always work. A general approach to tackle inverse Laplace transform can be very valuable.
+To find Laplace or inverse Laplace transform, we usually substitutes with existing transform pairs. Many common problems can solved in this method, but not all functions in general. We are trying find a general approach that will work for any function.
+
+For Laplace transform, its definition provides a good way to perform Laplace transform numerically. However, inverse Laplace transform is not as easy.
+Fourier-integral is known to be identical to inverse Laplace transform. However, computing a complex contour integral numerically is nontrivial.
 $$ \mathscr{L}^{-1}\{ F(s) \} = \frac{1}{2\pi i}\lim_{T \rightarrow \8} \int_{\lambda - i T}^{\lambda + i T} e^{s t} F(s) ds $$
 
-This paper is dedicated to a research of general approach to find the Inverse Laplace function of any arbitrary function. Post Inversion Formula is a theoretical general approach to find the inverse Laplace transform (See section 2 for more information). \cite{PI} However, mathematicians often believe that Post Inversion Formula is too computational intensive to be put into practical usage. In this paper, however, we introduce an algorithm that compute Post Inversion Formula with power series method (See section 3 for more information). This paper also contains some example codes and algorithm analysis.
+This paper is dedicated to a research of general numerical approach to inverse Laplace transform based on Post Inversion Formula.
+Post Inversion Formula is a theoretical equivalent to the inverse Laplace transform (See section 2 for more information). \cite{PI} However, mathematicians often believe that it is too computational intensive to be put into practical usage. In this paper, however, we introduce an algorithm based on Parker–Sochacki method (PSM) (See section 3 for more information).
+This paper also contains some example MATLAB codes and algorithm analysis.
 
-All source codes are available at 
-https://github.com/fredzqmNumericInverseLaplace
+All source codes are available in 
+\href{https://github.com/fredzqm/laplace}{this gitHub repository}
 
 
-\section{Post Inversion Formula}
+
+\section{Post Inversion Formula Challenges}
 
 Emil Post discovered Post's Inversion Formula, which is a simple-looking but usually impractical formula for evaluating an inverse Laplace transform. F(s) is the Laplace transform of f(t).
 \begin{equation*}
 f(t) = \lim_{k \rightarrow \8}\frac{(-1)^{k}}{k!} \left(\frac{k}{t}\right)^{k+1}  F^{(k)} \left(\frac{k}{t}\right)
 \end{equation*}
-As we can see from this formula, as k approaches infinity, we have several computational obstacles:
+As we can see from this formula, as k approaches infinity, we have several computational obstacles. 
 \begin{enumerate}
 \item
-	\textbf{High order of derivatives}: $F^k$ is going to be an higher order derivative of F. The traditional way to perform derivative requires high precision and division of tiny numbers. If we apply this method to a function repeatedly, the number will get distorted in the end. For many functions, as the order grows, the derivatives grow exponentially.
+	\textbf{High order of derivatives}: As k approach infinity, $F^k(t)$ becomes an high order derivative. Traditionally, we approximate derivatives slopes between dense sample points, but the number of valid sample points drop half for an higher order derivative. If we want to have n sample points in k-th order derivative, we need $n*2^{k}$ sample points in the original function. As k grows, the traditional method has an intractable run-time.
 
 \item 
-	\textbf{Overflow and underflow}: $\frac{1}{k!}$  is going to growing very small, while $\frac{k}{t}^{k+1}$ is growing very large. Gigantic and tiny number are both very challenge to software. The commonly used double precision floating number ranges from $2.22507*10^{-308}$ to  $1.79769*10^{308}$. Those fast growing or diminishing number exceeds this range quickly. This overflow and underflow happen when k reaches around 180.
-	High-order derivative is also one source of underflow. For many functions, chain and product rules cause the derivatives to approach infinitesimal, quickly beyond the range of double precision floating number.
+	\textbf{Overflow and underflow}: $\frac{1}{k!}$ grows very tiny, while $\frac{k}{t}^{k+1}$ grows very large. Gigantic and tiny number are big challenges because double precision floating number ranges from $2.22507*10^{-308}$ to  $1.79769*10^{308}$. Those fast growing or diminishing number exceeds this range quickly. The experiment indicates overflow and underflow happen when k reaches around 180.
+	Another source of overflow and underflow is high-order derivatives. For many functions, chain and product rules cause the derivatives to approach infinitesimal, quickly beyond the range of double precision floating number.
 
 \item
- 	\textbf{Slow convergence}: To acquire one single value, we need to perform a sequence of intensive computation to confirm the convergence. It is hard in general to know when it reaches the convergence and how accurate the result is. It is very inefficient to compute the formula above hundreds of time to get just one point in the final inverse Laplace transform curve.
+ 	\textbf{Slow convergence}: To acquire one single value, we need to perform a sequence of intensive computations to confirm the convergence. It is hard in general to know when it reaches the convergence and how accurate the result is. It is very inefficient to compute the formula above hundreds of time to get just one point in the final inverse Laplace transform curve.
 \end{enumerate}
 
-This paper will discuss the PSM method that solve the first two computational obstacles and use Post Inversion Formula to perform inverse Laplace transform. The last obstacle can be overcome with smart program that carefully selects k value and claims convergence when error is small enough.
+This paper will discuss the algorithm that solves the first two computational obstacles with PSM. The last obstacle is still troublesome. We are yet to develop smart program that carefully selects k value and claims convergence when error is small enough. In the end, we will show a few examples using Post Inversion Formula to perform inverse Laplace transform.
 
-\section{Power Series Method (PSM)}
+\section{Parker-–Sochacki method (PSM)}
 
-This section will illustrate Power Series Method and how it is used to calculate the high order derivatives.
-Given a differential equations system and initial conditions, Picard Iterative Process constructs a sequence of function set approaching the solution.
+This section will illustrate Parker-–Sochacki method and how it is used to calculate the high order derivatives. PSM may sometimes also refers to Power Series method because it use high-order power series to approximate a certain function.
 
-For instance, consider a three variable differential equation system:
+In brief, PSM produces the Taylor series of a function through Picard Iteration, see \cite{PSM}. Then, we can find the high order derivatives through those polynomials fairly quickly. Tradition method requires $O(n^{k})$ samples points, where k is the max derivative order. In contrast, PSM requires $O(k)$ iterations to reach an k-th order Taylor Series.
+
+For instance, consider a three element differential equation system:
 \begin{equation}
 \frac{dx}{dt} = f_{x}(t, x, y, z) \qquad
 \frac{dy}{dt} = f_{y}(t, x, y, z) \qquad
@@ -80,7 +96,7 @@ x_{0}(t) = x_{0} \qquad
 y_{0}(t) = y_{0} \qquad
 z_{0}(t) = z_{0}
 \end{equation}
-We can use the following Picard Iteration formula to generate a sequence of $x_{n}(t),y_{n}(t),z_{n}(t)$. As n grows, those function become closer to the solution of the differential system. See for example \cite{PICARD}
+We can use the following Picard Iteration formula to generate a sequence of $x_{n}(t),y_{n}(t),z_{n}(t)$. As n grows, those functions become closer to the solution of the differential system. See for example \cite{PICARD}
 \begin{equation}
 x_{n+1}(t) = x_{0} + \int_{t_{0}}^{t} f_{x}(t, x_{n}(t),y_{n}(t),z_{n}(t)) dt
 \end{equation}
@@ -90,30 +106,31 @@ y_{n+1}(t) = y_{0} + \int_{t_{0}}^{t} f_{y}(t, x_{n}(t),y_{n}(t),z_{n}(t)) dt
 \begin{equation}
 z_{n+1}(t) = z_{0} + \int_{t_{0}}^{t} f_{z}(t, x_{n}(t),y_{n}(t),z_{n}(t)) dt
 \end{equation}
-Picard iteration is widely used to solve complex differential equation system numerically. To take advantage of Picard Iteration, we have to restrict arithmetic in $f_{x,y,z}$. When these functions contain only additions and multiplications (referred as Normalized system in this paper), it has a nice property. Since $x_{0}(t),y_{0}(t),z_{0}(t)$ are constants initially, their integrals $x_{n}(t),y_{n}(y),z_{n}(t)$ are all polynomials for the solution. In that case, Picard Iterative Process generates a Taylor approximation at a given point of the function. Then, we can find the high order derivatives through those polynomials fairly quickly, see \cite{PSM}.
+Picard iteration is popular numerical method to solve complex differential equation system. However, the system can only contain additions and multiplications arithmetic, referred as Normalized ODE in this paper.
+Normalized system has a nice property. Since $x_{0}(t),y_{0}(t),z_{0}(t)$ are constants initially, their integrals $x_{n}(t),y_{n}(y),z_{n}(t)$ are all polynomials for the solution. Picard Iterative Process always generates Taylor approximations. Computer program can also handle these simple arithmetic easily.
+
 
 \subsection{Normalization of an arbitrary function}
 
-Though Picard Iteration works for any kind of differential equations, it is hard to write software to handle all possible function. All differential equation systems should be normalized, or converted to the following form:
+Though Picard Iteration works for any kind of ODE, software can only handle normalized ODE. Therefore, all ODE need to be converted into the normalized form:
 $$
 y'(t) = \sum^N_{i=1} k_{i} t^{n_{1}} x^{a_{1}}(t) y^{b_{1}}(t) z^{c_{1}}(t) 
 $$
 $$
 k_i \in \mathbb{R} \qquad n_i, a_i, b_i, c_i \in \mathbb{Z}^+_0
 $$
-The derivatives of all elements in the system can be represented as a sum of products of any combinations of elements and t. The following algorithm provides a brief way to normalize an arbitrary vector field. (Fro more detailed description, see paper at \cite{NORMAL})
-Even though this function has many compound parts, it can be easily broken down with our algorithm:
+Luckily, we have an algorithm to normalize an arbitrary vector field. (Fro more detailed description, see paper at \cite{NORMAL}.:
 \begin{enumerate}
-\item Check if all elements' derivative equation, if there are only additions and multiplications, we are done.
-\item Find the biggest part in the equation containing compound calculation, create another element and find its derivative.
-\item Replace all other matches in our system if possible. Repeat step 1
+\item Check if all elements' derivative equations contain only additions and multiplications, we are done.
+\item Find the biggest part in the equation containing arithmetic other than addition and multiplication, create an element to represent this part.
+\item Find the derivative of the new element and replace all other matches in our system with it. Repeat step 1.
 \end{enumerate}
-Let's normalize the following vector field.
+For example, let's normalize the following vector field.
 \begin{equation}
 x(t) = \sqrt{t+1}\cos(t^2)  \qquad
 x'(t) = \frac{\cos(t^2)}{2\sqrt{t+1}} - 2t\sqrt{t+1}*\sin(t^2)
 \end{equation}
-First of all, we see $2t\sqrt{t+1}*\sin(t^2)$ is the biggest part that involves a non-polynomial function, create an element for that. 
+First of all, we see $2t\sqrt{t+1}*\sin(t^2)$ is the biggest part that involves a non-polynomial function, so create an element for that. 
 \begin{equation}
 y(t) = \sqrt{t+1}\sin(t^2)  \qquad
 y'(t) = \frac{\sin(t^2)}{2\sqrt{t+1}} + 2t\sqrt{t+1}*\cos(t^2)
@@ -133,12 +150,15 @@ x'(t) = \frac{1}{2}x(t)*z(t) - 2t*y(t) \qquad
 y'(t) = \frac{1}{2}y(t)*z(t) + 2t*x(t) \qquad
 z'(t) = -z^{2}(t)
 \end{equation}
-This is a typical solution from the normalization algorithm. The organize format makes it easy for program to calculate. We can now run Picard Iteration through this normalized system and get a Taylor approximation.
+This is a typical solution from the normalization algorithm. The organize format makes it easy for program to compute. We can now run Picard Iteration through this normalized system and get a Taylor approximation.
 
 \subsection{Software Optimization}
-The MATLAB program developed takes an initial value problem (IVP).
-It stores the results of Picard Iteration as an array of coefficients. These arrays are initialized with initial value from IVP. Since all elements' derivatives are in normal forms, we can first compute those products and add them up to the next iteration. The program can perform a convolution of their coefficient arrays to get the product. The following algorithm performs a convolution of coefficient lists a and b to produce the product polynomial coefficient list c.
+Previous sections discussed the general idea of our approach, but to actual produce a feasible algorithm, the implementation needs to be optimized.
 
+The MATLAB program developed takes an initial value problem (IVP).
+It stores the results of Picard Iteration as an array. These arrays are initialized with initial value from IVP. Since all elements' derivatives are in normal forms, we can first compute products of polynomials with convolutions and add them up to produce the next iteration.
+
+The convolution implementation in MATLAB looks something like:
 \begin{algorithmic}
 \For{\texttt{i = 1 to k}}
    \For{\texttt{j = 1 to k}}
@@ -146,17 +166,22 @@ It stores the results of Picard Iteration as an array of coefficients. These arr
    \EndFor
 \EndFor
 \end{algorithmic}
-
-The convolution is an expensive operation. As you can see above, it takes $O(n^2)$. However, this algorithm can be optimized with some nice features of Picard's Iteration of Normalized system. This subsection will discusses how the program is optimized in several steps to achieve a linear computational time for each iteration. 
+However, as you can see, it takes $O(n^2)$, quite slow. Luckily, we can optimize this algorithm based on some nice features of Picard's Iterations for Normalized systems and eventually achieve linear run time.
 
 \subsubsection{Settled Coefficients}
 
-Notice that integrating one term several times can only produce a higher order term. In other words, the $k^{th}$ order term in the result can only be produced by integrating any term lower than k.
-It is easy to show that if any terms lower than $k^{th}$ are settled (remain the same value in later iteration), in the next iteration, $k^{th}$ terms are also settled. We know that 0-order terms are settled in iteration 0, since they are all constants from initial conditions. By mathematical induction, we can conclude that in $k^{th}$ iteration, any terms up to $k^{th}$ order are settled, see \cite{SETTLE}. 
+\noindent \textbf{Inductive hypothesis}:
+In k-th iteration, any terms with order less than or equal to k are settled (remain the same value in later iteration).
 
-From this proof, we can see that the first k terms of the results are settled in $k^{th}$ iteration, so there is no need for us to recompute those k terms. The complete convolution may also produce terms with higher order than k+1 in the next iteration, but those terms are subjected to changes in later iteration. To avoid necessary computation, the program will not compute those terms either. Instead it focuses on the $(k+1)^{th}$ order terms only and appends only one more coefficient to each list.
+\noindent \textbf{Base step}:
+We know that 0-order terms are settled in iteration 0, since they are all constants from initial conditions.
 
-When two elements are multiplied, the program only needs to iterate both coefficient list once to find the next term. This nice feature help reduce the convolution of two elements to O(n). The following algorithm performs a quick convolution of coefficient lists a and b to produce the $k^{th}$ term c.
+\noindent \textbf{Inductive step}: 
+In k-th iteration, any terms lower than $k^{th}$ are settled.
+Notice integrating always produces a higher order term. Therefore, the $(k+1)^{th}$ order term is only affected by lower terms after integration. Therefore, in the next iteration, $k^{th}$ terms are also settled. 
+\vspace{5mm}
+
+From this proof, we can see that the first k terms of the results are settled in $k^{th}$ iteration, so there is no need for us to recompute those terms. The complete convolution also generate higher order terms than k+1, but these terms are subjected to changes in later iteration. Therefore, to avoid unnecessary computation, the program does not compute those terms either. As a result of discussion above, we write program to calculate convolution of $(k+1)^{th}$ order term only and appends only one more coefficient to each list. Therefore, each iteration use a quick convolution, an O(n) algorithm:
 
 \begin{algorithmic}
 \For{\texttt{i = 1 to k}}
@@ -164,27 +189,29 @@ When two elements are multiplied, the program only needs to iterate both coeffic
 \EndFor
 \end{algorithmic}
 
-
-\subsubsection{Reduce high order}
-However, when the normalized system has three or more elements multiplied together, the program needs to perform convolutions in steps. It needs to generate a complete coefficient list for the next convolution. The quick convolution algorithm can only be applied to the last one. The computation time goes back to $O(n^2)$.
+\subsubsection{Save intermediate products}
+When the normalized system has three or more elements multiplied together, the program needs to perform convolutions in steps. It needs to generate a complete coefficient list for the next convolution. The quick convolution algorithm can only be applied to the last one. For $a^{m}$, where $m>2$, the computation time goes back to $O((m-1)*n^2)$.
 For instance, if we have high order normalized system.
 \begin{equation}
 a' = a^{15}
 \end{equation}
 At each iteration, the program has to perform 13 complete convolutions to get $a^{14}$ and one quick convolution to get the next term it needs. The total run time is $O(14n^{2}+n)$.
 
-Quick convolution works for two element convolution because earlier values are already stored in the array. Those settled terms effectively save redundant computation. However, when three or more elements are multiplied, settled terms of intermediate products, like $a^{2}$ are not saved. Therefore, one way to optimize this is to store intermediate products from $a^{1}$ to $a^{14}$. This reduces the run time to O(14n), but induces 13 more arrays.
+Quick convolution works for two element convolution because earlier values are stored. Those settled terms effectively save redundant computation. Therefore, we choose optimize this by breaking high order exponents down to many second order multiplication.
 
-In the program, elements and intermediate products are stored separately. The new version of the program stores data in two different kind of computation units -- {\it adders} and {\it multipliers}. In each iteration, each multiplier performs one quick convolution of two other units (either adders or multipliers), while each adder sum up terms with $kt^{n}$ from several other units. Each adder corresponds to one element in the system. This design makes it possible for the same convolution to be saved and reused multiple times. For example, a two-element system: 
+In the new version, elements are stored in {\it adders}, while intermediate products are stored in {\it multipliers}. In each iteration, each multiplier performs one quick convolution of two other units (either adders or multipliers), while each adder sum up terms with $kt^{n}$ from a other units. Each adder corresponds to one element in the system.
+
+This design makes it possible for the same convolution to be saved and reused multiple times. For example, a two-element system: 
 \begin{equation}
 a' = - 2t^{2}*b^{2} + b
 \end{equation}
 \begin{equation}
 b' = - 2t*b^{2}
 \end{equation}
-$b^{2}$ occurs twice. If the program does not store it as intermediate convolution result, this operation would be performed twice in every iteration. The adders and multipliers system not only reduce higher order system to $O(n^{2})$, but also effectively reduces repeated calculations.
+$b^{2}$ occurs twice. If the program does not store it as intermediate convolution result, this operation would be performed twice in every iteration. The adders and multipliers system not only reduce higher order system to $O(n^{2})$, but also effectively reduces many repeated calculations.
 
-A further possible optimization comes from the idea of binary exponentiation algorithm, which is used to calculate $a^{n}$ in O(ln(n)) time. This algorithm reduces the exponent to half with $n^{k} = (n^{\lfloor \frac{k}{2} \rfloor})^{2} * n^{k\mod2} $. For example, $a^{15}$ is reduced in the following sequence.
+\subsubsection{Binary exponentiation}
+Encountering high order exponentiation like $a^{15}$, we choose to apply binary exponentiation algorithm, which can calculate $a^{n}$ in O(ln(n)) time, see \cite{BE}. $a^{15}$ can be computed in the following sequence.
 \begin{equation}
 b = a * a;
 c = b * b;
@@ -193,31 +220,31 @@ e = d * c;
 f = e * a;
 a' = d * f;
 \end{equation}
-This way reduce the number of quick convolution for high order system to O(ln(n)) for system.
 
-A MATLAB script (rephraseRel.m) is developed to convert any normalized differential equation system into adders and multipliers system. This algorithm cut down high order products into second order and also optimize repeated products in the system.
-This small program can only perform a rough conversion under a reasonable bound, but it is not guarantee to find the solution with the least multipliers. However, reducing a given higher order normalized differential equation system into the most optimized adder and multiplier system is still a very difficult (possible intractable) algorithmic problem. Future research might find a better algorithm.
+Many efforts were put into developing an algorithm to extract minimum number of cached intermediate products from an normalized ODE system. This algorithm (rephraseRel.m in the repos) tries to find common factor in each terms and aims to reduce the number of multiplication in the system. With the help of this script, the user can still input an normalized ODE, which will be automatically analyzed.
 
 
 \section{Computational Problems}
-Another big issue with implementing Post's Inversion Formula is the overflow and underflow problem. As part of the equation, $\frac{(-1)^{k}}{k!} (\frac{k}{t})^{k+1}$ involves number that grows intractably. The limit in Post Inversion Formula eventually converges at a finite number because the big part and tiny part cancel each other. However, as k grows large, double precision fails to capture the whole range. 
-If we want to use Post Inversion Formula, we have to figure out a way to represent and store large and tiny numbers without losing accuracy.
+Another big issue with implementing Post's Inversion Formula is the overflow and underflow problem. As part of the equation, $\frac{(-1)^{k}}{k!} (\frac{k}{t})^{k+1}$ involves number that grows exponentially. The limit in Post Inversion Formula eventually converges at a finite number because the big and tiny parts cancel each other. However, as k grows large, double precision numbers fail to capture its value.
+If we want to use Post Inversion Formula, we have to figure out a way to represent large and tiny numbers without losing accuracy.
 
 \subsubsection{Growing Derivatives}
 For many common functions, its derivatives diminish as the order grows. 
-Experiment shows that the $-\ln(F^{k}(s))$ is proportional to k. However, the program still needs to track those tiny numbers. This grow rate poses great challenge to convolution calculation, where many products have to be summed.
+In a few examples, $-\ln(F^{k}(s))$ is proportional to k. This grow rate poses great challenge to convolution calculation, where many products have to be summed.
 
-One way we found to represent an extremely large or small number is with its logarithm. In the program, the coefficient of Taylor series terms are stored in two lists -- log of absolute value and the sign.
+One way we found to represent an extremely large or small number is with its logarithm. Any number can be represent with log of its absolute value and its sign.
 
-The quick convolution algorithm involves two steps: multiply corresponding coefficients respectively and sum the products up. Multiplication is reduced to addition if numbers are represented as a logarithm. However, summation becomes quite tricky. To keep value bounded, the program cannot use exp() to recover the actual value.
+The quick convolution algorithm involves two steps: multiply corresponding coefficients respectively and sum the products up. Multiplication becomes addition if numbers are represented as a logarithm. However, summation becomes quite tricky. To keep value bounded, the program cannot use exp() to recover the actual value.
 
-This issue halts the research for a while, until the pattern of convolution is thoroughly studied. Among all the products being summed, many are much bigger than others ($10^{16}$ larger). These products are small enough to be negligible.
-As for as the program is concerned, only the few large value need to be summed and others can be seen as 0. The actual algorithm divides all products by the maximum of them, and then use exp() to recover from logarithm representation. This approach puts a cap on the largest value the program needs to handle and ignore small terms. Those recovered numbers are summed and then convert back to logarithm representation for storage. Overflow problem is successfully handled.
-Surprisingly, the logarithm storage method does not slow down the program but speeds it up due to those possible causes:
+This issue halted the research for a while, until the pattern of convolution was thoroughly studied. Among all the products being summed, many are much bigger than others ($10^{16}$ larger). Others are small enough to be ignored.
+As for as the program is concerned, only a few large values contribute to the summation. 
+The actual program in the end divides all products by the maximum among them, and then use exp() to recover from logarithm representation. This approach puts a cap on the largest value the program needs to handle. exp() converts tiny underflowing number to 0, since they are negligible. Those recovered numbers are summed and then convert back to logarithm representation for storage. Overflow problem is successfully handled.
+
+Surprisingly, the logarithm storage method does not slow down the program but speeds it up. We make guesses a few possible causes:
 \begin{enumerate}
-\item Logarithm representation changes multiplications to additions. Multiplications are much more expensive than addition. Computing $e^{\ln(a)+\ln(b)}$ instead of $a b$ directly gain efficiency at the expense of some accuracy.
-\item MATLAB well optimizes ln() and exp(), which take O(1) in run time.
-\item Most operations, including addition, ln(), exp() are performed as arrays, which are well optimized with parallel computing in MATLAB, possibly faster than O(n).
+\item Logarithm representation changes multiplications to additions. Multiplications are much slower than addition. Computing $e^{\ln(a)+\ln(b)}$ instead of $a b$ directly gain efficiency at the expense of some accuracy.
+\item MATLAB well optimizes ln() and exp(), which take constant run time.
+\item Most operations, including addition, ln(), exp() are performed as arrays, which are well optimized with parallel computing in MATLAB.
 \end{enumerate}
 
 \subsubsection{Constant Multifactor}
@@ -226,14 +253,14 @@ Another part of Post's Inversion Formula, $\frac{(-1)^{k}}{k!} (k)^{k+1}$ is onl
 $$\ln(n!) = n*\ln(n) - n + O(\ln(n)) $$
 However, an error of $O(ln(n))$ is not accurate enough for our purpose. 
 
-A dynamic programming approach is used to accurately and efficiently calculate $\ln(n!)$. An array $a_{k}$ is defined as $a_{k} = ln(n!)$. Then we have the recurrence relationship -- $a_{k+1} = a_{k} + ln(n+1)$. This simple log-factorial array help the program to calculate this constant part in constant time.
+A dynamic programming approach is used to accurately and efficiently calculate $\ln(n!)$. An array $a_{k}$ is defined as $a_{k} = ln(n!)$. Then we have the recurrence relationship -- $a_{k+1} = a_{k} + ln(n+1)$. This simple log-factorial array help the program to find constant part in constant time.
 
 
 \section{Test MATLAB Codes}
 
 In this section, we will discuss the interface of the developed software. The program can used in two ways.
 \begin{enumerate}
-\item Given an known function and its differential equation system, the program can perform inverse Laplace transform with Post's Inversion Formula.
+\item Given an known function and its ODE, the program can perform inverse Laplace transform with Post's Inversion Formula.
 \item Given an unknown differential equation system, the program use PSM method to approximate and plot its solution. The user can set the minimum interval between computation points and the minimum order of Taylor series for each point.
 Then the program can use the estimated function values to perform inverse Laplace transform with Post's Inversion Formula.
 \end{enumerate}
@@ -248,9 +275,9 @@ $$
 $$
 k_i \in \mathbb{R} \qquad n_i, a_i, b_i, c_i \in \mathbb{Z}^+_0
 $$
-Since each element's derivative can be expressed as the sum of a series of products, it is easy to represent those equations in the unit of products. A struct rel() is defined for this purpose.
+Since each element's derivative can be expressed as the sum of a series of products, we decide to represent the system as a list of products. A struct rel() is defined for this purpose.
 $$ \text{rel(addTo, coefficient , order, comps )}$$
-First of all, for a system with n element, each element in the system is given an id from 1 to n. The element with id 1 always represents the function we try to solve. Each product in the system is encoded in a rel struct.
+First of all, for a system with n elements, each element in the system is given an id from 1 to n. The element with id 1 always represents the function we try to solve. Each product in the system is encoded in a rel struct.
 \begin{enumerate}
 \item "addTo" refers to the element this product will be added to;
 \item "coefficient" refers to the constant coefficient;
@@ -272,15 +299,17 @@ which is converted into the following normalized differential equation system.
 \right \}
 \]
 If we represent x, y, z with 1, 2 and 3 perspectively, we have following five products represented with rel();
-\begin{tabular}{ccc}
-  rel(1, 1/2, 0, [1 3]) & $\frac{1}{2}x(t)*z(t)$  \\
-  rel(1, -2 , 1 , [ 2 ] ) &  $- 2t*y(t)$ \\
-  rel(2, 1/2, 0, [2 3]) & $\frac{1}{2}y(t)*z(t)$  \\
-  rel(2, 2 , 1 , [ 1 ] ) &  $2t*x(t)$ \\
-  rel(3, -1 , 0 , [3 3] ) &  $-z^{2}(t)$
-\end{tabular}
 
-A deterministic differential equation system also need initial conditions at certain start point. An array of numbers can represent the initial values of all elements in the system. If the result are already known, the user can also pass in a cell array of exact functions.
+\vspace{0.3cm}
+\begin{tabular}{ccccc}
+  $\frac{1}{2}x(t)*z(t)$  &  $- 2t*y(t)$ &
+  $\frac{1}{2}y(t)*z(t)$ & $2t*x(t)$ & $-z^{2}(t)$ \\
+  rel(1, 1/2, 0, [1 3]) & rel(1, -2 , 1 , [ 2 ] ) & 
+  rel(2, 1/2, 0, [2 3]) & rel(2, 2 , 1 , [ 1 ] ) & rel(3, -1 , 0 , [3 3] )
+\end{tabular}
+\vspace{0.2cm}
+
+A deterministic differential equation system also needs initial conditions at a start point. An array of numbers can represent the initial values of all elements in the system. If the result are already known, the user can also alternatively pass in a cell array of exact functions.
 \begin{lstlisting}
 s = simulator( { @(t)sqrt(t+1)*cos(t^2)  @(t)sqrt(t+1)*sin(t^2) ...
 		 @(t)1/(t+1) } , 0 , ...
@@ -354,18 +383,20 @@ figure(5)
 plot(tt, vv - answer(tt) ,'-');
 \end{lstlisting}
 
-s.converge(t, k) compute $v(t, k)$, given value of t and k. If either or both of t and k is an array, an array of results will be returned.
+s.converge(t, k) computes $v(t, k)$, given time and order. k needs to be large enough so the Post's Inversion formula converges.
+If either or both of t and k is an array, an array of results will be returned.
 \begin{equation*}
 v(t, k) = \frac{(-1)^{k}}{k!} \left(\frac{k}{t}\right)^{k+1}  F^{(k)} \left(\frac{k}{t}\right)
 \end{equation*}
-The convergence section plot how v(t,k) converges to the inverse Laplace transform.
 
-The inverseTransform section plot the actual Inverse Laplace transform. This example takes 17sec to compute.
+The convergence section plots how v(t,k) converges to the inverse Laplace transform.
+
+The inverseTransform section plots the actual Inverse Laplace transform. This example takes 17sec to compute.
 The following table summarize the v(t,k), error and time to compute. As we can see, as t grows, it takes longer for v(t,k) to converge and needs larger k and longer time.
 
 \begin{tabular}{| l | l | l | l | l | l |}
 \hline
-t  &  k   &  [v(t,k)] & [sin(t)] & error & time \\
+t  &  k   &  v(t,k) & sin(t) & error & time \\
 \hline
 1  &  100 &  0.8425 & 0.8415 & 0.001077 & 0.042 \\
 \hline
@@ -390,8 +421,6 @@ t  &  k   &  [v(t,k)] & [sin(t)] & error & time \\
 100  &  100000 &  -0.4809 & 0.2027 & 0.0255 & 148.276  \\
 \hline
 \end{tabular}
-
-https://github.com/fredzqm/NumericInverseLaplace/blob/master/
 
 \clearpage
 \input{IABbib.tex}
