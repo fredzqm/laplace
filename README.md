@@ -5,8 +5,8 @@ Simulator uses PSM methods to calculate numeric value and derivatives of functio
 
 Use Post’s Inversion Formula:
 <br>
-<img src='postsFormula.png'>
-<img src='postsFormulaPremise.png'>
+<img src='paper/postsFormula.png'>
+<img src='paper/postsFormulaPremise.png'>
 
 We have a way to calculate the inverse laplace transform. However, this would involve very computational-intense process to obtain the convergence of Post's Forumula. This also involves high order derivative.
 
