@@ -17,11 +17,6 @@
 \fancyhf{}
 \rfoot{Page \thepage \hspace{1pt} of \pageref{LastPage}}
 
-
-\begin{document}
-\centerline{\Large Inverse Laplace transform and Post Inversion Formula}
-\vspace{1cm}
-
 \newsavebox\foobox
 \newlength{\foodim}
 \newcommand{\slantbox}[2][0]{\mbox{%
@@ -36,6 +31,29 @@
         \hskip 0.5\foodim
 }}
 \def\Laplace{\ThisStyle{\slantbox[-.45]{$\SavedStyle\mathscr{L}$}}}
+
+\begin{document}
+
+\hbox{ % Horizontal box
+\hspace*{0.2\textwidth} % Whitespace to the left of the title page
+\rule{1pt}{\textheight} % Vertical line
+\hspace*{0.05\textwidth} % Whitespace between the vertical line and title page text
+\parbox[b]{0.75\textwidth}{ % Paragraph box which restricts text to less than the width of the page
+
+{\noindent\Huge\bfseries Inverse Laplace transform and Post Inversion Formula}
+\\[5\baselineskip] % Tagline or further description
+
+{\large Student Investigator:  \Large \textsc{Qinmao Zhang}} % Author name
+\\[1\baselineskip] % Tagline or further description
+{\large Faculty Mentor: \textsc{ \Large Vincenzo Isaia}} % Author name
+\\[6\baselineskip] % Tagline or further description
+
+\vspace{0.23\textheight}
+
+}}
+
+
+
 
 
 \section{Introduction}
