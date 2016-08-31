@@ -53,9 +53,6 @@
 }}
 
 
-
-
-
 \section{Introduction}
 
 Laplace transform and inverse Laplace are powerful mathematical tools. Here is the definition of Laplace transform:
@@ -68,12 +65,11 @@ Fourier-integral is known to be identical to inverse Laplace transform. However,
 $$ \mathscr{L}^{-1}\{ F(s) \} = \frac{1}{2\pi i}\lim_{T \rightarrow \8} \int_{\lambda - i T}^{\lambda + i T} e^{s t} F(s) ds $$
 
 This paper is dedicated to a research of general numerical approach to inverse Laplace transform based on Post Inversion Formula.
-Post Inversion Formula is a theoretical equivalent to the inverse Laplace transform (See section 2 for more information). \cite{PI} However, mathematicians often believe that it is too computational intensive to be put into practical usage. In this paper, however, we introduce an algorithm based on Parker–Sochacki method (PSM) (See section 3 for more information).
+Post Inversion Formula, see for example \cite{KB}. is a theoretical equivalent to the inverse Laplace transform (See section 2 for more information). However, mathematicians often believe that it is too computational intensive to be put into practical usage. In this paper, however, we introduce an algorithm based on Parker–Sochacki method (PSM) (See section 3 for more information).
 This paper also contains some example MATLAB codes and algorithm analysis.
 
 All source codes are available in 
 \href{https://github.com/fredzqm/laplace}{this gitHub repository}
-
 
 
 \section{Post Inversion Formula Challenges}
@@ -99,9 +95,9 @@ This paper will discuss the algorithm that solves the first two computational ob
 
 \section{Parker-–Sochacki method (PSM)}
 
-This section will illustrate Parker-–Sochacki method and how it is used to calculate the high order derivatives. PSM may sometimes also refers to Power Series method because it use high-order power series to approximate a certain function.
+This section will illustrate Parker-–Sochacki method and how it is used to calculate the high order derivatives, see \cite{OV}. PSM may sometimes also refers to Power Series method because it use high-order power series to approximate a certain function.
 
-In brief, PSM produces the Taylor series of a function through Picard Iteration, see \cite{PSM}. Then, we can find the high order derivatives through those polynomials fairly quickly. Tradition method requires $O(n^{k})$ samples points, where k is the max derivative order. In contrast, PSM requires $O(k)$ iterations to reach an k-th order Taylor Series.
+In brief, PSM produces the Taylor series of a function through Picard Iteration. Then, we can find the high order derivatives through those polynomials fairly quickly. Tradition method requires $O(n^{k})$ samples points, where k is the max derivative order. In contrast, PSM requires $O(k)$ iterations to reach an k-th order Taylor Series.
 
 For instance, consider a three element differential equation system:
 \begin{equation}
@@ -114,7 +110,7 @@ x_{0}(t) = x_{0} \qquad
 y_{0}(t) = y_{0} \qquad
 z_{0}(t) = z_{0}
 \end{equation}
-We can use the following Picard Iteration formula to generate a sequence of $x_{n}(t),y_{n}(t),z_{n}(t)$. As n grows, those functions become closer to the solution of the differential system. See for example \cite{PICARD}
+We can use the following Picard Iteration formula to generate a sequence of $x_{n}(t),y_{n}(t),z_{n}(t)$. As n grows, those functions become closer to the solution of the differential system. See for example \cite{CL}
 \begin{equation}
 x_{n+1}(t) = x_{0} + \int_{t_{0}}^{t} f_{x}(t, x_{n}(t),y_{n}(t),z_{n}(t)) dt
 \end{equation}
@@ -125,7 +121,7 @@ y_{n+1}(t) = y_{0} + \int_{t_{0}}^{t} f_{y}(t, x_{n}(t),y_{n}(t),z_{n}(t)) dt
 z_{n+1}(t) = z_{0} + \int_{t_{0}}^{t} f_{z}(t, x_{n}(t),y_{n}(t),z_{n}(t)) dt
 \end{equation}
 Picard iteration is popular numerical method to solve complex differential equation system. However, the system can only contain additions and multiplications arithmetic, referred as Normalized ODE in this paper.
-Normalized system has a nice property. Since $x_{0}(t),y_{0}(t),z_{0}(t)$ are constants initially, their integrals $x_{n}(t),y_{n}(y),z_{n}(t)$ are all polynomials for the solution. Picard Iterative Process always generates Taylor approximations. Computer program can also handle these simple arithmetic easily.
+Normalized system has a nice property. Since $x_{0}(t),y_{0}(t),z_{0}(t)$ are constants initially, their integrals $x_{n}(t),y_{n}(y),z_{n}(t)$ are all polynomials for the solution. Picard Iterative Process always generates Taylor approximations, see \cite{PS}. Computer program can also handle these simple arithmetic easily.
 
 
 \subsection{Normalization of an arbitrary function}
@@ -137,7 +133,8 @@ $$
 $$
 k_i \in \mathbb{R} \qquad n_i, a_i, b_i, c_i \in \mathbb{Z}^+_0
 $$
-Luckily, we have an algorithm to normalize an arbitrary vector field. (Fro more detailed description, see paper at \cite{NORMAL}.:
+
+There are vector fields that can not be normalized. Proof of existence of such a vector fields is given in \cite{CPSW}. However, because of the difficulty in constructing such a vector fields, the most vector fields in practice can be normalized by the following algorithm:
 \begin{enumerate}
 \item Check if all elements' derivative equations contain only additions and multiplications, we are done.
 \item Find the biggest part in the equation containing arithmetic other than addition and multiplication, create an element to represent this part.
@@ -302,7 +299,10 @@ First of all, for a system with n elements, each element in the system is given 
 \item "order" refers to the order of t in the system, 0 if no t needed; 
 \item "comps" is a list of all the other elements multiplied.
 \end{enumerate}
-We would take a look at the complex function discussed in previous section.
+
+We will take a look at the complex function discussed in previous section.
+This problem originates from section 3.1 of Warne's paper, see \cite{EX} for more details, which can cause trouble for many numerical methods.
+
 \begin{equation}
 x(t) = \sqrt{t+1}\cos(t^2)
 \end{equation}
@@ -434,9 +434,9 @@ t  &  k   &  v(t,k) & sin(t) & error & time \\
 \hline
 100  &  1000 &  -0.0047 & -0.5064 & 0.5016 & 0.072 \\
 \hline
-100  &  10000 &  -0.3036 & 0.2027 & 0.2027 & 2.673 \\
+100  &  10000 &  -0.3036 & -0.5064 & 0.2027 & 2.673 \\
 \hline
-100  &  100000 &  -0.4809 & 0.2027 & 0.0255 & 148.276  \\
+100  &  100000 &  -0.4809 & -0.5064 & 0.0255 & 148.276  \\
 \hline
 \end{tabular}
 
