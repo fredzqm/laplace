@@ -412,6 +412,9 @@ The convergence section plots how v(t,k) converges to the inverse Laplace transf
 The inverseTransform section plots the actual Inverse Laplace transform. This example takes 17sec to compute.
 The following table summarize the v(t,k), error and time to compute. As we can see, as t grows, it takes longer for v(t,k) to converge and needs larger k and longer time.
 
+\begin{table}
+\caption {sin(t) inverse laplace transform timing and error} \label{tab:timing} 
+\begin{center}
 \begin{tabular}{| l | l | l | l | l | l |}
 \hline
 t  &  k   &  v(t,k) & sin(t) & error & time \\
@@ -439,6 +442,15 @@ t  &  k   &  v(t,k) & sin(t) & error & time \\
 100  &  100000 &  -0.4809 & -0.5064 & 0.0255 & 148.276  \\
 \hline
 \end{tabular}
+\end{center}
+\end{table}
+
+\section{Conclusion}
+In conclusion, a few big computational obstacles were overcome during the research. We were able to calculate high-order derivatives in $O(k^{2})$, and represent enormous number as logarithm. However, as shown in Table \ref{tab:timing}, as t grows, it takes high order of k to achieve reasonable error. In our algorithm, run time is $O(k^{2})$ because each iteration is $O(k)$ and we need to calculate up to $k^{th}$ order. The slow convergence of Post's Inversion formula makes the problem hard to tackle when t is large. However, PSM itself is a powerful tool. Many PSM modelings studies in this research may be applied to other applications beyond Inverse Laplace transform.
+
+
+\section{Acknowledges}
+Thanks to math department of Rose-Hulman for granting Independent study, so this can be done. I want to thank Dr. Vincenzo Isaia particularly for provide me this great opportunity. I could not have finished this research with his guide and carefully technical help.
 
 \clearpage
 \input{IABbib.tex}
