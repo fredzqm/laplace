@@ -446,7 +446,9 @@ t  &  k   &  v(t,k) & sin(t) & error & time \\
 \end{table}
 
 \section{Conclusion}
-In conclusion, a few big computational obstacles were overcome during the research. We were able to calculate high-order derivatives in $O(k^{2})$, and represent enormous number as logarithm. However, as shown in Table \ref{tab:timing}, as t grows, it takes high order of k to achieve reasonable error. In our algorithm, run time is $O(k^{2})$ because each iteration is $O(k)$ and we need to calculate up to $k^{th}$ order. The slow convergence of Post's Inversion formula makes the problem hard to tackle when t is large. However, PSM itself is a powerful tool. Many PSM modelings studies in this research may be applied to other applications beyond Inverse Laplace transform.
+In conclusion, a few big computational obstacles were overcome during the research. We were able to calculate high-order derivatives in $O(k^{2})$, and represent enormous number as logarithm. However, as shown in Table \ref{tab:timing}, as t grows, it takes high order of k to achieve reasonable error. In our algorithm, run time is $O(k^{2})$ because each iteration is $O(k)$ and we need to calculate up to $k^{th}$ order. This performance is decent if we can limit the range of k. However, when t becomes large, we needs larger k to achieve convergence.
+
+However, PSM itself is a powerful tool. The main application of Laplace transform is solving differential equation systems. If Laplace transform makes the original system more complex, we might as well apply our PSM model to the original differential equation system. This leads to our next research topic -- PSM and delayed differential equation systems.
 
 
 \section{Acknowledges}
